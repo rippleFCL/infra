@@ -1,0 +1,1 @@
+ansible_inventory_dir="../../ansible/environment/prod"
