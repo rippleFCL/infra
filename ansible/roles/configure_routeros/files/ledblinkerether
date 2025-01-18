@@ -1,0 +1,74 @@
+/interface ethernet
+
+:local cycletime 1000
+:local cyclenum 2
+:local blinkpercycle 8
+:local blinkparts 3
+:local ifmatch "ether"
+:local instance "ledblinkerether"
+:local ledsuffix "-led"
+
+######
+
+
+:local pstat ({})
+
+:while ([:len [/system script job find script=$instance]] = 1) do={
+
+    :local iflst [find name~($ifmatch) running=yes]
+    :local ledlst ({})
+
+    :local blinkshort ($cycletime / $blinkpercycle)
+    :local blinkshortoff ($blinkshort / $blinkparts)
+    :local blinkshorton ($blinkshortoff * ($blinkparts -1))
+
+    :local realblinkshorton ($blinkshorton - 50)
+    :if ($realblinkshorton < 0) do={
+        :set realblinkshorton 0
+    }
+
+    /system leds set [find name~($ifmatch) running=no] type=interface-activity
+    :if ([:len $iflst] != [:len $pstat]) do={
+        :set pstat ({})
+        :foreach counter=i in=$iflst do={
+            :set pstat ($pstat,"0/0")
+        }
+    }
+
+    :foreach counter=k,i in=$iflst do={
+        :local iname [get $i name]
+        :local iled [/system leds find leds=($iname.$ledsuffix)]
+        :set ledlst ($ledlst, $iled)
+    }
+
+
+    :for counter=loop from=1 to=$cyclenum do={
+        :local cstat ({})
+        :local blinklst ({})
+
+        :foreach counter=k,i in=$iflst do={
+            :local istat ([get $i rx-bytes]."/".[get $i tx-bytes])
+            :local iled ($ledlst->$k)
+            :set cstat ($cstat, $istat)
+            :if ($istat != ($pstat->$k)) do={
+                :set blinklst ($blinklst, ($iled))
+            }
+        }
+        :for counter=i from=0 to=($cycletime / $blinkshort - 1) do={
+            :if ($i = 0) do={
+                :delay delay-time=(($realblinkshorton)."ms")
+            } else={
+                :delay delay-time=(($blinkshorton)."ms")
+            }
+
+            :foreach counter=j in=$blinklst do={
+                /system leds set $j type=off
+            }
+            :delay delay-time=(($blinkshortoff)."ms")
+            :foreach counter=j in=$blinklst do={
+                /system leds set $j type=on
+            }
+        }
+        :set pstat $cstat
+    }
+}

@@ -1,0 +1,62 @@
+setup_netbox_ipaddresses:
+  - ip_address: 10.0.1.1/24
+    description: edge router
+  - ip_address: 10.0.1.2/24
+    description: internal router
+  - ip_address: 10.0.1.5/24
+    description: internal switch
+  - ip_address: 10.0.1.6/24
+    description: rack switch
+  - ip_address: 10.0.1.10/24
+    description: idrac esxi netcu1
+  - ip_address: 10.0.1.11/24
+    description: idrac esxi netcu2
+  - ip_address: 10.0.1.12/24
+    description: idrac edgefw
+  - ip_address: 10.0.1.14/24
+    description: idrac esxi2
+  - ip_address: 10.0.1.16/24
+    description: idrac esxi storage2
+  - ip_address: 10.0.1.17/24
+    description: idrac esxi storage1
+  - ip_address: 10.0.1.21/24
+    description: esxi2
+  - ip_address: 10.0.1.23/24
+    description: esxi netcu1
+  - ip_address: 10.0.1.24/24
+    description: esxi netcu2
+  - ip_address: 10.0.1.25/24
+    description: esxi storage1
+  - ip_address: 10.0.1.26/24
+    description: esxi storage1
+  - ip_address: 10.0.1.30/24
+    description: jankvisor
+  - ip_address: 10.0.1.40/24
+    description: vcsa
+  - ip_address: 10.0.1.60/24
+    description: netbox
+  - ip_address: 10.0.1.190/24
+    description: desktop static mgmt ip
+  - ip_address: 10.2.1.2/24
+    description: esxi2 esxi storage vlan ip
+  - ip_address: 10.2.1.3/24
+    description: netcu1 esxi storage vlan ip
+  - ip_address: 10.2.1.4/24
+    description: netci2 esxi storage vlan ip
+  - ip_address: 10.2.1.5/24
+    description: esxi-storage1 esxi storage vlan ip
+  - ip_address: 10.2.1.6/24
+    description: esxi-storage2 esxi storage vlan ip
+
+setup_netbox_prefix:
+  - prefix: 10.0.0.0/16
+    description: prod routable prefixes
+  - prefix: 10.1.0.0/16
+    description: prod transit prefixes
+  - prefix: 10.2.0.0/16
+    description: prod private prefixes
+  - prefix: 10.2.1.0/24
+    description: prod esxi storage vlan
+
+ansible_connection: local
+ansible_python_interpreter: "{{ansible_playbook_python}}"

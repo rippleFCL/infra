@@ -1,0 +1,28 @@
+---
+- name: Deploy nas
+  hosts: nas
+  become: true
+  tasks:
+    - name: Setup nmcli
+      ansible.builtin.include_role:
+        name: nmcli
+
+    - name: Setup users
+      ansible.builtin.include_role:
+        name: setup_users
+
+    - name: Create/import pool
+      ansible.builtin.include_role:
+        name: setup_zfs
+      vars:
+        setup_zfs_pools: "{{ zfs_pool_config }}"
+        setup_zfs_datasets: "{{ zfs_fs_config }}"
+        setup_zfs_zvols: "{{ zfs_zvol_config }}"
+        setup_zfs_perf_tuning: "{{ zfs_performance_tuning }}"
+        setup_zfs_monitoring: "{{ zfs_pools_scrub_cron }}"
+
+    - name: Setup nfs
+      ansible.builtin.include_role:
+        name: setup_nfs
+      vars:
+        setup_nfs_exports: "{{ nfs_exports }}"

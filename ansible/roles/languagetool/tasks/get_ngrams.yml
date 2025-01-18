@@ -1,0 +1,35 @@
+---
+
+- name: Get ngrams directory contents
+  ansible.builtin.uri:
+    url: https://languagetool.org/download/ngram-data
+    return_content: true
+  register: ngram_contents
+  check_mode: false
+
+- name: Parse latest English ngram
+  ansible.builtin.set_fact:
+    latest_en_ngram: >-
+      {{ ngram_contents.content | regex_findall('ngrams-en-\w+\.zip') | unique | sort | last }}
+
+- name: Get installed ngram version
+  ansible.builtin.slurp:
+    src: "{{ languagetool_ngrams_version_path }}"
+  ignore_errors: true
+  register: installed_ngram
+
+- name: Download/update ngrams
+  when: installed_ngram is failed or installed_ngram.content | b64decode != latest_en_ngram
+  block:
+    - name: Download and extract ngrams
+      ansible.builtin.unarchive:
+        src: https://languagetool.org/download/ngram-data/{{ latest_en_ngram }}
+        dest: "{{ languagetool_dir }}/ngrams/"
+        remote_src: true
+        creates: "{{ languagetool_dir }}/ngrams/en"
+
+    - name: Write ngram version to file
+      ansible.builtin.copy:
+        content: "{{ latest_en_ngram }}"
+        dest: "{{ languagetool_ngrams_version_path }}"
+        mode: '0644'

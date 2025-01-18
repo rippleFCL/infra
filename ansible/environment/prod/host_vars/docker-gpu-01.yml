@@ -1,0 +1,28 @@
+setup_users_secondary:
+  - username: plex
+    password: "{{ lookup('bws_cache', 'ripple_user_hashed_password').value }}"
+    uid: 1100
+
+mount_nfs_shares:
+  - path: /mnt/plex_media
+    share: 10.2.3.1:/hdd-pool/hdd-nas/plex_media/nfs
+    opts: rw,async,hard,nofail,_netdev
+  - path: /mnt/download_pool
+    share: 10.2.3.2:/ssd-pool/ssd-nas/download/nfs/
+    opts: rw,async,hard,nofail,_netdev
+
+nmcli_interfaces:
+  - name: ens192
+    method: auto
+
+  - name: ens256
+    method: manual
+    ip: 10.2.3.10/24
+
+deploy_docker_services:
+  - plex_stack
+  - wakapi
+
+install_container_toolkit: true
+nvidia_drivers_install: true
+nvidia_cuda_pkg_version: "12.5.1-1"

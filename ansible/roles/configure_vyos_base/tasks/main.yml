@@ -1,0 +1,5 @@
+---
+- name: Configure hostname and domain-name
+  vyos.vyos.vyos_system:
+    host_name: "{{ hostname }}"
+    domain_name: "{{ subdomain_name }}.{{ internal_domain }}"

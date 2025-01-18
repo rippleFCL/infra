@@ -1,0 +1,29 @@
+---
+- name: Create dnsmasq.conf
+  ansible.builtin.template:
+    src: dnsmasq.conf.j2
+    dest: /etc/dnsmasq.conf
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: "0644"
+    validate: "docker run --rm -v %s:/file strm/dnsmasq --test -C /file"
+  notify: Restart the dnsmasq container
+
+- name: Stop existing dnsmasq containers # noqa ignore-errors
+  community.general.docker_container:
+    name: dnsmasq
+    state: absent
+  ignore_errors: true
+
+- name: Create dnsmasq container
+  community.general.docker_container:
+    name: dns
+    image: strm/dnsmasq
+    restart_policy: always
+    ports:
+      - "53:53/tcp"
+      - "53:53/udp"
+    volumes:
+      - /etc/dnsmasq.conf:/etc/dnsmasq.conf
+    capabilities:
+      - NET_ADMIN

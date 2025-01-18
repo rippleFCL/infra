@@ -1,0 +1,182 @@
+disk_map:
+  - name: docker_data
+    device: /dev/sdb
+    partition: 1
+    mountpoint: "/mnt/docking_data"
+    mountpoint_mode: '0755'
+
+app_base_dir: /mnt/docking_data/
+
+deploy_docker_service_definitions:
+  technisync:
+    services:
+      technisync:
+        image: ghcr.io/monstermuffin/technisync:latest
+        container_name: technisync
+        restart: unless-stopped
+        volumes:
+          - /mnt/docking_data/technisync/config:/data
+        environment:
+          SYNC_INTERVAL: 600
+          DB_PATH: /data/dns_sync.db
+          LOG_LEVEL: INFO
+          SYNC_REVERSE_ZONES: true
+          ZONES_TO_SYNC: ripplefcl.com
+          SERVER1_URL: http://technitium-01.int.ripplefcl.com:5380
+          SERVER1_API_KEY: "{{ lookup('bws_cache', 'technitium-01-api-token').value }}"
+          SERVER2_URL: http://technitium-02.int.ripplefcl.com:5380
+          SERVER2_API_KEY: "{{ lookup('bws_cache', 'technitium-02-api-token').value }}"
+
+  net_stack:
+    services:
+      technitium:
+        container_name: technitium
+        hostname: technitium
+        image: technitium/dns-server:latest
+        network_mode: "host"
+        environment:
+          DNS_SERVER_DOMAIN: dns-server
+        volumes:
+          - /mnt/docking_data/dns_stack/config:/etc/dns
+        restart: unless-stopped
+
+  plex_stack:
+    services:
+      plex:
+        image: plexinc/pms-docker:1.41.1.9057-af5eaea7a
+        container_name: plex
+        network_mode: host
+        privileged: true
+        deploy:
+          resources:
+            reservations:
+              devices:
+                - driver: nvidia
+                  count: 1
+                  capabilities: [gpu]
+        environment:
+          PLEX_UID: "1100"
+          PLEX_GID: "1100"
+          TZ: "Europe/London"
+          PLEX_CLAIM: "{{ lookup('bws_cache', 'plex_claim').value }}"
+          NVIDIA_DRIVER_CAPABILITIES: all
+          NVIDIA_VISIBLE_DEVICES: all
+        volumes:
+          - /mnt/docking_data/plex/config:/config
+          - /mnt/plex_media/media/tv:/tv
+          - /mnt/plex_media/media/movies:/movies
+        restart: unless-stopped
+
+      overseerr:
+        image: sctx/overseerr:latest
+        container_name: overseerr
+        environment:
+          TZ: "Europe/London"
+        ports:
+          - 5055:5055
+        volumes:
+          - /mnt/docking_data/overseerr/config:/app/config
+        restart: unless-stopped
+
+      sonarr:
+        image: ghcr.io/hotio/sonarr:release-4.0.10.2544
+        container_name: sonarr
+        environment:
+          PUID: "1100"
+          PGID: "1100"
+          UMASK: "002"
+          TZ: "Europe/London"
+        ports:
+          - "8989:8989"
+        volumes:
+          - /mnt/docking_data/sonarr/config:/config
+          - /mnt/plex_media/:/data
+        restart: unless-stopped
+
+      radarr:
+        image: ghcr.io/hotio/radarr:release-5.14.0.9383
+        container_name: radarr
+        environment:
+          PUID: "1100"
+          PGID: "1100"
+          UMASK: "002"
+          TZ: "Europe/London"
+        ports:
+          - "7878:7878"
+        volumes:
+          - /mnt/docking_data/radarr/config:/config
+          - /mnt/plex_media/:/data
+        restart: unless-stopped
+
+
+      sabnzbd:
+        image: ghcr.io/onedr0p/sabnzbd:4.3.3
+        user: 1100:1100
+        command: --logging 0
+        container_name: sabnzbd
+        environment:
+          TZ: "Europe/London"
+        ports:
+          - "8080:8080"
+        volumes:
+          - /mnt/docking_data/sabnzbd/config:/config
+          - /mnt/plex_media/downloaded/:/data/downloaded
+          - /mnt/plex_media/downloading/:/data/downloading
+        restart: unless-stopped
+  web_proxy:
+    web:
+      image: nginx
+
+  unifi_controller:
+    services:
+      unifi-controller:
+        image: lscr.io/linuxserver/unifi-controller:latest
+        container_name: unifi-controller
+        environment:
+          - PUID=1000
+          - PGID=1000
+          - TZ=Etc/UTC
+          - MEM_LIMIT=1024 # optional
+          - MEM_STARTUP=1024 # optional
+        volumes:
+          - /path/to/data:/config
+        ports:
+          - 8443:8443
+          - 3478:3478/udp
+          - 10001:10001/udp
+          - 8080:8080
+          - 1900:1900/udp # optional
+          - 8843:8843 # optional
+          - 8880:8880 # optional
+          - 6789:6789 # optional
+          - 5514:5514/udp # optional
+        restart: unless-stopped
+  wakapi:
+    services:
+      wakapi:
+        image: ghcr.io/muety/wakapi:2.12.2
+        ports:
+          - 3000:3000
+        volumes:
+          - /mnt/docking_data/wakapi/:/data/
+        restart: unless-stopped
+        environment:
+          WAKAPI_PASSWORD_SALT: "{{ lookup('bws_cache', 'wakapi_salt').value }}"
+          WAKAPI_ALLOW_SIGNUP: 'false'
+          WAKAPI_LEADERBOARD_ENABLED: 'false'
+          WAKAPI_DISABLE_FRONTPAGE: 'true'
+          WAKAPI_EXPOSE_METRICS: 'true'
+          WAKAPI_PUBLIC_URL: http://waka.ripplefcl.com
+  taskin:
+    services:
+      taskin-api:
+        image: ghcr.io/ripplefcl/taskin-api:0.1.1
+        volumes:
+          - /mnt/docking_data/taskin/database.db:/app/database.db
+
+      taskin-ui:
+        image: ghcr.io/ripplefcl/taskin-ui:0.1.1
+        ports:
+          - 8888:8080
+        environment:
+          API_URL: http://taskin-api:8080/

@@ -1,0 +1,67 @@
+---
+
+# https://www.reddit.com/r/PleX/comments/kxhl0q/howto_guide_for_p2000_installation_for_plex_in/
+# https://developer.nvidia.com/cuda-downloads
+# https://docs.nvidia.com/cuda/cuda-installation-guide-linux/index.html#debian
+
+- name: Install NVIDIA requirements
+  ansible.builtin.apt:
+    name:
+      - gcc
+      - make
+    state: present
+
+- name: Add CUDA apt repository key
+  ansible.builtin.get_url:
+    url: https://developer.download.nvidia.com/compute/cuda/repos/{{ release }}/{{ ansible_architecture }}/3bf863cc.pub
+    dest: /etc/apt/trusted.gpg.d/cuda-archive-keyring.asc
+    owner: root
+    mode: '644'
+  register: cuda_apt_key
+
+- name: Add CUDA apt repository
+  ansible.builtin.apt_repository:
+    repo: >-
+      deb [signed-by={{ cuda_apt_key.dest }}]
+      https://developer.download.nvidia.com/compute/cuda/repos/{{ release }}/{{ ansible_architecture }}/ /
+    filename: cuda-{{ release }}-{{ ansible_architecture }}
+    state: present
+
+- name: Disable Nouveau drivers
+  ansible.builtin.copy:
+    content: |
+      blacklist nouveau
+      options nouveau modeset=0
+    dest: /etc/modprobe.d/blacklist-nouveau.conf
+    mode: '644'
+    owner: root
+  notify: Reboot
+
+- name: Flush handlers
+  ansible.builtin.meta: flush_handlers
+
+- name: Install NVIDIA CUDA package (non-specific version)
+  ansible.builtin.apt:
+    name: cuda
+    update_cache: true
+    state: present
+  ignore_errors: "{{ ansible_check_mode }}"
+  when: nvidia_cuda_pkg_version | length == 0
+
+- name: Install NVIDIA CUDA package (version {{ nvidia_cuda_pkg_version }})
+  ansible.builtin.apt:
+    name: cuda={{ nvidia_cuda_pkg_version }}
+    update_cache: true
+    state: present
+  ignore_errors: "{{ ansible_check_mode }}"
+  when: nvidia_cuda_pkg_version | length > 0
+
+- name: Add CUDA paths to environment
+  ansible.builtin.copy:
+    content: |
+      # /usr/local/cuda is a symlink to a symlink to the latest installed version of CUDA, i.e. /usr/local/cuda-x.x.x
+      export PATH="/usr/local/cuda/bin/:$PATH"
+      export LD_LIBRARY_PATH="/usr/local/cuda/lib64${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
+    dest: /etc/profile.d/cuda_paths.sh
+    mode: '644'
+    owner: root

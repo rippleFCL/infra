@@ -1,0 +1,425 @@
+internal_domain: int.ripplefcl.com
+
+configure_opnsense_interfaces:
+  mgmt:
+    identifier: lan
+    vlan: mgmt
+    config:
+      if: vmx0
+
+  lan:
+    identifier: opt1
+    vlan: lan
+
+  wlan:
+    identifier: opt2
+    vlan: wlan
+
+  guest_wlan:
+    identifier: opt3
+    vlan: guest_wlan
+
+  ir_transit:
+    identifier: opt4
+    vlan: ir_transit
+
+  fw_cluster_pfsync:
+    identifier: opt5
+    vlan: fw_cluster_pfsync
+
+  vm_network:
+    identifier: opt6
+    vlan: vm_network
+
+  mgmt_vpn:
+    identifier: opt7
+    config:
+      if: wg0
+
+  jens_link:
+    identifier: opt8
+    config:
+      if: wg1
+
+  "WireGuard (Group)":
+    identifier: wireguard
+    config:
+      internal_dynamic: "1"
+      if: "wireguard"
+      virtual: "1"
+      type: "group"
+      networks: ""
+
+  Loopback:
+    identifier: lo0
+    config:
+      internal_dynamic: "1"
+      enable: "1"
+      type: none
+      virtual: "1"
+      if: lo0
+      ipaddr: "127.0.0.1"
+      subnet: "8"
+      ipaddrv6: "::1"
+      subnetv6: "128"
+
+configure_opnsense_vlans:
+  lan: vmx1
+  wlan: vmx1
+  guest_wlan: vmx1
+  ir_transit: vmx1
+  fw_cluster_pfsync: vmx1
+  vm_network: vmx1
+
+
+configure_opnsense_vip:
+  - interface: "ir_transit"
+    vlan: ir_transit
+    description: inter router transit carp
+    vhid: 1
+    password: test
+    mode: "carp"
+    address: "10.1.2.2/24"
+  - interface: "lan"
+    vlan: lan
+    description: lan carp
+    vhid: 2
+    password: test
+    mode: "carp"
+    address: "10.0.2.1/24"
+  - interface: "wlan"
+    vlan: wlan
+    description: wlan carp
+    vhid: 3
+    password: test
+    mode: "carp"
+    address: "10.0.4.1/24"
+  - interface: "guest_wlan"
+    vlan: guest_wlan
+    description: guest_wlan carp
+    vhid: 4
+    password: test
+    mode: "carp"
+    address: "10.0.5.1/24"
+  - interface: "vm_network"
+    vlan: vm_network
+    description: vm_network carp
+    vhid: 5
+    password: test
+    mode: "carp"
+    address: "10.0.6.1/24"
+
+
+configure_opnsense_fw_aliases:
+  - name: private_ips
+    type: network
+    content:
+      - "10.0.0.0/8"
+      - "172.16.0.0/12"
+      - "192.168.0.0/16"
+
+  - name: jens_ip_space
+    type: network
+    content:
+      - "10.120.0.0/16"
+      - "10.64.0.0/10"
+
+configure_opnsense_rule_blocks:
+  block_all:
+    - description: "block all"
+      log: true
+      action: "block"
+
+  allow_internet:
+    - description: "allow internet"
+      action: "pass"
+      source:
+        network: "self"
+      destination:
+        alias: "private_ips"
+        invert: true
+
+  allow_dns:
+    - description: "allow dns"
+      action: "pass"
+      protocol: UDP
+      source:
+        network: self
+      destination:
+        ip: self
+        port: 53
+
+  allow_icmp:
+    - description: "allow icmp"
+      action: "pass"
+      protocol: "ICMP"
+      destination:
+        ip: self
+
+
+  allow_dhcp:
+    - description: "allow dhcp"
+      action: "pass"
+      protocol: "UDP"
+      destination:
+        ip: 255.255.255.255
+        port: 67
+      source:
+        ip: 0.0.0.0
+        port: 68
+
+  allow_media:
+    - description: "allow plex"
+      action: pass
+      protocol: "TCP"
+      destination:
+        ip: 10.0.6.201
+        port: 32400
+      source:
+        network: self
+    - description: "allow overseerr"
+      action: pass
+      protocol: "TCP"
+      destination:
+        ip: 10.0.6.201
+        port: 5055
+      source:
+        network: self
+
+  allow_wireguard:
+    - description: allow jens link
+      action: pass
+      protocol: "UDP"
+      destination:
+        ip: 10.1.2.2
+        port: 42069
+    - description: allow mgmt link
+      action: pass
+      protocol: "UDP"
+      destination:
+        ip: 10.1.2.2
+        port: 51950
+
+  allow_to_jens:
+    - description: allow traffic to jens network
+      action: pass
+      destination:
+        alias: jens_ip_space
+      source:
+        network: self
+    - description: allow traffic to jens transit
+      action: pass
+      destination:
+        network: jens_link
+      source:
+        network: self
+
+
+  allow_services:
+    - description: "allow taskin"
+      action: pass
+      protocol: "TCP"
+      destination:
+        ip: 10.0.6.202
+        port: 8888
+      source:
+        network: self
+
+configure_opnsense_rules:
+  - interface: "mgmt_vpn"
+    rule_blocks:
+      - "allow_mgmt_vpn"
+    local_rule_blocks:
+      allow_mgmt_vpn:
+        - description: allow all mgmt vpn traffic
+          action: pass
+
+  - interface: "fw_cluster_pfsync"
+    rule_blocks:
+      - "allow_all"
+    local_rule_blocks:
+      allow_all:
+        - description: "allow all"
+          action: "pass"
+
+  - interface: "lan"
+    rule_blocks:
+      - "allow_to_jens"
+      - "allow_dhcp"
+      - "allow_dns"
+      - "allow_internet"
+      - "allow_wlan_access"
+      - "allow_media"
+      - "allow_services"
+      - "block_all"
+    local_rule_blocks:
+      allow_wlan_access:
+        - description: "allow wlan"
+          action: pass
+          source:
+            network: lan
+          destination:
+            network: wlan
+
+  - interface: "wlan"
+    rule_blocks:
+      - "allow_to_jens"
+      - allow_dhcp
+      - "allow_dns"
+      - "allow_internet"
+      - "allow_media"
+      - "allow_services"
+      - "block_all"
+
+  - interface: "guest_wlan"
+    rule_blocks:
+      - "allow_dhcp"
+      - "allow_dns"
+      - "allow_internet"
+      - "block_all"
+
+  - interface: "vm_network"
+    rule_blocks:
+      - "allow_to_jens"
+      - "allow_dhcp"
+      - "allow_icmp"
+      - "allow_dns"
+      - "allow_internet"
+      - "block_all"
+
+  - interface: "ir_transit"
+    rule_blocks:
+      - "allow_icmp"
+      - "allow_dns"
+      - "allow_wireguard"
+      - "block_all"
+
+  - interface: "jens_link"
+    rule_blocks:
+      - "allow_icmp"
+      - "allow_jens"
+      - "block_all"
+
+
+    local_rule_blocks:
+      allow_jens:
+        - description: allow vpn traffic
+          action: "pass"
+          source:
+            network: self
+
+        - description: "allow it mate jens"
+          action: "pass"
+          source:
+            alias: jens_ip_space
+
+
+
+configure_opnsense_gateways:
+  - name: internet
+    interface: ir_transit
+    gateway: 10.1.2.1
+    monitor: 1.1.1.1
+    default: true
+
+  - name: jens_link
+    interface: jens_link
+    gateway: 10.0.21.1
+    monitor: 10.0.21.1
+
+
+configure_opnsense_routes:
+  - gateway: jens_link
+    network: "10.120.0.0/16"
+    description: jens link
+  - gateway: jens_link
+    network: "10.64.0.0/10"
+    description: jens link ts
+
+configure_opnsense_general_settings:
+  dnsserver: "10.0.6.10"
+  timezone: Europe/London
+
+configure_opnsense_dhcp_relay:
+  destinations:
+    - uuid: 06a54514-10c4-4fad-b68f-fdd88bf9ffb4
+      server: 10.0.6.10
+      name: tech
+  relays:
+    - enabled: 1
+      interface: lan
+      uuid: a5b987a1-6df0-49b8-b4f1-d7ecbb7abfed
+      agent_info: 0
+      destination: tech
+    - enabled: 1
+      interface: guest_wlan
+      uuid: dc7876b8-88ec-4b3c-8915-0e4ec9e108fd
+      agent_info: 0
+      destination: tech
+    - enabled: 1
+      interface: wlan
+      uuid: 54f3e538-f913-4d33-b08e-5bf848739162
+      agent_info: 0
+      destination: tech
+    - enabled: 1
+      interface: vm_network
+      uuid: fd9a2b69-2137-4a30-8fe2-d67e67482678
+      agent_info: 0
+      destination: tech
+    - enabled: 1
+      interface: mgmt
+      uuid: a808967c-3a38-4cb5-be74-33eb5a81373e
+      agent_info: 0
+      destination: tech
+
+
+configure_opnsense_dns_forwarding:
+  - server: "10.0.6.10"
+    domain: ripplefcl.com
+
+  - server: "10.0.6.10"
+    domain: ""
+
+  - server: "10.0.6.9"
+    domain: ""
+
+configure_opnsense_wireguard:
+  peers:
+    - name: ripple_phone
+      public_key: CVZZlGsrwaVRZW37f0YAcUBN/BXTN1HHZMlZI1T99nc=
+      allowed_ips:
+        - 10.0.20.0/24
+
+    - name: jens
+      public_key: DIvPceAObyD2kgxRoswruEky1EY6UKjEbi7278lqnmE=
+      endpoint: kube-api.beryjuio-home.k8s.beryju.io
+      port: 42069
+      keepalive: 5
+      allowed_ips:
+        - 0.0.0.0/0
+
+  server:
+    - name: mgmt_vpn
+      peers:
+        - ripple_phone
+      tunnel_ips:
+        - 10.0.20.1/24
+      public_key: "{{ lookup('bws_cache', 'wireguard_server_pubkey').value }}"
+      private_key: "{{ lookup('bws_cache', 'wireguard_server_prikey').value }}"
+      port: 51950
+      vip: "10.1.2.2"
+
+    - name: jens_link
+      peers:
+        - jens
+      tunnel_ips:
+        - 10.0.21.2/24
+      disable_routes: true
+      public_key: V6EKDP9qnLeTZMwLbJibbzO03NZL4LxSBEjIe7ki0Ak=
+      private_key: "{{ lookup('bws_cache', 'wireguard_jens_privkey').value }}"
+      port: 42069
+      vip: "10.1.2.2"
+
+configure_opnsense_packages:
+  - os-ddclient
+  - os-theme-cicada

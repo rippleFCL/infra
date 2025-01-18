@@ -1,0 +1,13 @@
+---
+- name: Setup ips
+  community.general.nmcli:
+    conn_name: "{{ item.name }}"
+    ifname: "{{ item.name }}"
+    type: ethernet
+    method4: "{{ item.get('method', omit) }}"
+    ip4: "{{ item.get('ip', omit) }}"
+    gw4: "{{ item.get('gateway', omit) }}"
+    dns4: "{{ item.get('dns', omit) }}"
+    state: present
+  loop: "{{ setup_networking_interfaces }}"
+  become: true

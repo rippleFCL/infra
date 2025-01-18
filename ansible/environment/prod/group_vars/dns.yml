@@ -1,0 +1,31 @@
+domain_name: ripplefcl.com
+
+
+
+dnsmasq_addresses:
+  - name: idrac-esxi-netcu1.int.ripplefcl.com
+    address: 10.0.1.10
+  - name: idrac-esxi-netcu2.int.ripplefcl.com
+    address: 10.0.1.11
+  - name: idrac-edgefw.int.ripplefcl.com
+    address: 10.0.1.12
+  - name: idrac-esxi2.int.ripplefcl.com
+    address: 10.0.1.14
+  - name: idrac-esxi-storage2.int.ripplefcl.com
+    address: 10.0.1.16
+  - name: idrac-esxi-storage1.int.ripplefcl.com
+    address: 10.0.1.17
+  - name: jankvisor.int.ripplefcl.com
+    address: 10.0.1.30
+  - name: vcsa.int.ripplefcl.com
+    address: 10.0.1.40
+  - name: esxi2.int.ripplefcl.com
+    address: 10.0.1.21
+  - name: esxi-netcu1.int.ripplefcl.com
+    address: 10.0.1.23
+  - name: esxi-netcu2.int.ripplefcl.com
+    address: 10.0.1.24
+  - name: esxi-storage1.int.ripplefcl.com
+    address: 10.0.1.25
+  - name: esxi-storage2.int.ripplefcl.com
+    address: 10.0.1.26

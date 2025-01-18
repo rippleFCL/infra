@@ -1,0 +1,111 @@
+setup_users_secondary:
+  - username: plex
+    password: "{{ lookup('bws_cache', 'ripple_user_hashed_password').value }}"
+    uid: 1100
+
+zfs_pool_config:
+  - name: "ssd-pool"
+    options:
+      compression: lz4
+    vdevs:
+      - type: mirror
+        devices:
+          - ata-CT1000BX500SSD1_2250E692B7EE
+          - ata-CT1000BX500SSD1_2250E692B7F2
+      - type: mirror
+        devices:
+          - ata-CT1000BX500SSD1_2250E692B802
+          - ata-CT1000BX500SSD1_2250E692B863
+      - type: mirror
+        devices:
+          - ata-CT1000BX500SSD1_2250E692B864
+          - ata-CT1000BX500SSD1_2250E692B86D
+      - type: mirror
+        devices:
+          - ata-CT1000BX500SSD1_2250E692B870
+          - ata-CT1000BX500SSD1_2250E692B871
+      - type: mirror
+        devices:
+          - ata-CT1000BX500SSD1_2250E692B874
+          - ata-CT1000BX500SSD1_2250E6932C45
+      - type: mirror
+        devices:
+          - ata-CT1000BX500SSD1_2250E69330F0
+          - ata-CT1000BX500SSD1_2250E69330F1
+      - type: mirror
+        devices:
+          - ata-CT1000BX500SSD1_2250E69330F9
+          - ata-CT1000BX500SSD1_2250E69330FD
+
+zfs_fs_config:
+  - pool: "ssd-pool/ssd-nas"
+    options:
+      compression: lz4
+    mountpoint:
+      owner: ripple
+      group: ripple
+      recurse: true
+    datasets:
+      - name: "vcenter"
+        datasets:
+          - name: "nfs"
+            options:
+              sync: always
+            mountpoint:
+              owner: root
+              group: root
+              recurse: true
+      - name: "veeam"
+        datasets:
+          - name: "nfs"
+            mountpoint:
+              owner: root
+              group: root
+              recurse: true
+      - name: "vms-data"
+        datasets:
+          - name: "iscsi"
+            mountpoint:
+              owner: root
+              group: root
+              recurse: true
+      - name: "download"
+        datasets:
+          - name: "nfs"
+            mountpoint:
+              owner: plex
+              group: plex
+              recurse: true
+
+
+zfs_performance_tuning:
+  - param: zfs_arc_max
+    value: "{{ (ansible_memtotal_mb | int * 1024 * 1024 * 0.9) | round | int }}"
+  - param: zfs_arc_min
+    value: "{{ (ansible_memtotal_mb | int * 1024 * 1024 * 0.8) | round | int }}"
+
+zfs_pools_scrub_cron:
+  - pool: ssd-pool
+    minute: 0
+    hour: 0
+    day: "*"
+    month: "*"
+    weekday: sun
+
+nfs_exports:
+  - "/ssd-pool/ssd-nas/vcenter/nfs/ *(rw,sync,no_root_squash)"
+  - "/ssd-pool/ssd-nas/veeam/nfs/ *(rw,sync,no_root_squash)"
+  - "/ssd-pool/ssd-nas/download/nfs/ *(rw)"
+
+nmcli_interfaces:
+  - name: ens192
+    method: manual
+    gateway: 10.0.1.1
+    dns: 1.1.1.1
+    ip: 10.0.1.31/24
+  - name: ens256
+    method: manual
+    ip: 10.2.1.1/24
+  - name: ens161
+    method: manual
+    ip: 10.2.3.2/24

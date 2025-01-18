@@ -1,0 +1,12 @@
+- name: Setup snat
+  ansibleguy.opnsense.source_nat:
+    match_fields: ['description']
+    sequence: "{{ index + 1 }}"
+    description: "{{ item.description }}"
+    interface: "{{ configure_opnsense_interfaces[item.interface]['identifier'] }}"
+    source_net: "{{ item.source_net }}"
+    target: "{{ configure_opnsense_interfaces[item.target]['identifier'] }}ip"
+    log: "{{ item.log | default(false) }}"
+  loop: "{{ configure_opnsense_snat }}"
+  loop_control:
+    index_var: "index"

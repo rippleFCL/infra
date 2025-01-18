@@ -1,0 +1,4 @@
+---
+unifi_controller_base_dir: "{{ [app_base_dir, 'unifi-controller'] | path_join }}"
+unifi_controller_mongo_dir: "{{ [unifi_controller_base_dir, 'mongo'] | path_join }}"
+unifi_controller_appdata_dir: "{{ [unifi_controller_base_dir, 'unifi'] | path_join }}"

@@ -1,0 +1,60 @@
+---
+- name: Setup xml interfaces
+  ansible.builtin.include_tasks:
+    file: apply_xml_interfaces.yml
+
+- name: Setup interfaces
+  ansible.builtin.include_tasks:
+    file: setup_interfaces.yml
+
+- name: Setup wireGuard
+  ansible.builtin.include_tasks:
+    file: setup_wireguard.yml
+  when: configure_opnsense_wireguard is defined
+
+- name: Setup xml general settings
+  ansible.builtin.include_tasks:
+    file: apply_xml_general_settings.yml
+
+- name: Setup ha config
+  ansible.builtin.include_tasks:
+    file: apply_xml_ha_config.yml
+  when: configure_opnsense_haconfig is defined
+
+- name: Setup dhcp relay
+  ansible.builtin.include_tasks:
+    file: apply_xml_dhcprelay.yml
+  when: configure_opnsense_dhcp_relay is defined
+
+- name: Flush handers
+  ansible.builtin.meta: flush_handlers
+
+- name: Install packages
+  ansible.builtin.include_tasks:
+    file: install_packages.yml
+  when: configure_opnsense_packages is defined
+
+- name: Configure routing
+  ansible.builtin.include_tasks:
+    file: configure_routing.yml
+
+- name: Apply fw aliases forwarding
+  ansible.builtin.include_tasks:
+    file: add_fw_aliases.yml
+  when: configure_opnsense_fw_aliases is defined
+
+- name: Apply firewall rules
+  ansible.builtin.include_tasks:
+    file: apply_fw_rules.yml
+  when: configure_opnsense_rules is defined
+
+
+- name: Apply dns forwarding
+  ansible.builtin.include_tasks:
+    file: setup_dns_forwarding.yml
+  when: configure_opnsense_dns_forwarding is defined
+
+- name: Apply dns forwarding
+  ansible.builtin.include_tasks:
+    file: apply_snat_rules.yml
+  when: configure_opnsense_snat is defined

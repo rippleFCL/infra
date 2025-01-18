@@ -1,0 +1,14 @@
+---
+- name: Deploy users
+  hosts: networking:&opnsense
+  vars:
+    ansible_user: root
+    ansible_password: "{{ lookup('bws_cache', 'ripple_user_password').value }}"
+    ansible_ssh_common_args: '-o StrictHostKeyChecking=no'
+  tasks:
+    - name: "Convert freebsd install to opnsense"
+      ansible.builtin.include_role:
+        name: bootstrap_opnsense
+      vars:
+        bootstrap_opnsense_api_key: "{{ opnsense_api_key }}"
+        bootstrap_opnsense_api_secret: "{{ opnsense_api_secret }}"

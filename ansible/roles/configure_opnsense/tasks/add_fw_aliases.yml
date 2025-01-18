@@ -1,0 +1,13 @@
+- name: Add fw alias
+  ansibleguy.opnsense.alias:
+    name: "{{ item.name }}"
+    content: "{{ item.content }}"
+    type: "{{ item.type }}"
+    reload: false
+  loop: "{{ configure_opnsense_fw_aliases }}"
+  register: fw_alias
+
+- name: Reloading running config
+  ansibleguy.opnsense.reload:
+    target: 'alias'
+  when: fw_alias.changed # noqa: no-handler

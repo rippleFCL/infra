@@ -1,0 +1,23 @@
+- name: Creating mirror/zraid zpool(s)
+  ansible.builtin.command:
+    cmd: >-
+      zpool create
+      {{ zfs_pool.creation_options | join(' ') if zfs_pool.creation_options is defined else '' }}
+      {{ zfs_pool.name }}
+      {{ zfs_pool.vdevs[0].type }}
+      {{ zfs_pool.vdevs[0].devices | join(' ') }}
+  register: command_result
+  changed_when: "command_result.rc == 0 and command_result.stdout == '' and command_result.stderr == ''"
+
+- name: Adding mirror/zraid zpool(s)
+  ansible.builtin.command:
+    cmd: >-
+      zpool add
+      {{ zfs_pool.name }}
+      {{ vdev.type }}
+      {{ vdev.devices | join(' ') }}
+  loop: "{{ zfs_pool.vdevs[1:] }}"
+  loop_control:
+    loop_var: vdev
+  register: command_result
+  changed_when: "command_result.rc == 0 and command_result.stdout == '' and command_result.stderr == ''"

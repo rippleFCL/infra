@@ -1,0 +1,3 @@
+ansible_user: ripple
+ansible_password: "{{ lookup('bws_cache', 'ripple_user_password').value }}"
+ansible_become_password: "{{ lookup('bws_cache', 'ripple_user_password').value }}"

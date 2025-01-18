@@ -1,0 +1,18 @@
+- name: 'Setup bootstrap vm'
+  hosts: bootstrap-machine
+  become: true
+  vars:
+    ansible_ssh_common_args: '-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null'
+  tasks:
+    - name: Install docker
+      ansible.builtin.include_role:
+        role: geerlingguy.docker
+
+
+    - name: Setup dnsmasq
+      ansible.builtin.include_role:
+        role: dnsmasq
+
+    - name: Setup keadhcp
+      ansible.builtin.include_role:
+        role: keadhcp

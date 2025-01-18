@@ -1,0 +1,50 @@
+---
+
+- name: Set hostname
+  community.routeros.api_modify:
+    path: system identity
+    data: [name: "{{ inventory_hostname }}"]
+    handle_absent_entries: remove
+    handle_entries_content: remove_as_much_as_possible
+
+- name: Set login banner
+  community.routeros.api_modify:
+    path: system note
+    data: "{{ [item] }}"
+  loop:
+    - note: "\
+        \n      ----------------------------------------\
+        \n      |\
+        \n      | You are logged into {{ inventory_hostname }}\
+        \n      |\
+        \n      ----------------------------------------"
+    - show-at-login: true
+  loop_control:
+    label: "{{ item | dict2items | map(attribute='key') | first }}"
+
+- name: Install ledblinkerether script
+  community.routeros.api_modify:
+    path: system script
+    data:
+      - name: ledblinkerether
+        comment: https://forum.mikrotik.com/viewtopic.php?t=147168
+        policy: read,write
+        source: "{{ lookup('ansible.builtin.file', 'ledblinkerether') }}"
+
+- name: Install ledresetether script
+  community.routeros.api_modify:
+    path: system script
+    data:
+      - name: ledresetether
+        comment: https://forum.mikrotik.com/viewtopic.php?t=147168
+        policy: read,write
+        source: "{{ lookup('ansible.builtin.file', 'ledresetether') }}"
+
+- name: Install ledblinkerether run schedule
+  community.routeros.api_modify:
+    path: system scheduler
+    data:
+      - name: ledblinkerether_start
+        comment: Run ledblinkerether on boot
+        start-time: startup
+        on-event: ledblinkerether

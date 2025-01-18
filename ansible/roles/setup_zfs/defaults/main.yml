@@ -1,0 +1,22 @@
+---
+debian_use_backports: True
+backports_internal_uri: https://deb.debian.org/debian
+backports_internal_components: "main contrib non-free"
+backports_internal_additional_packages:
+  - apt-transport-https
+
+zfs_debian_package_key: http://zfsonlinux.org/4D5843EA.asc
+zfs_debian_package_url: http://archive.zfsonlinux.org/debian/pool/main/z/zfsonlinux
+zfs_debian_package_version: 6
+zfs_debian_package: "zfsonlinux_{{ zfs_debian_package_version }}_all.deb"
+
+
+setup_zfs_perf_tuning: []
+
+setup_zfs_monitoring: []
+
+setup_zfs_datasets: []
+
+setup_zfs_pools: []
+
+setup_zfs_zvols: []

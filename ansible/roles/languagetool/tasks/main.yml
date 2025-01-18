@@ -1,0 +1,38 @@
+---
+
+- name: Create LanguageTool app directory
+  ansible.builtin.file:
+    path: "{{ app_base_dir }}/languagetool/ngrams"
+    owner: root
+    group: root
+    mode: '0755'
+    state: directory
+
+- name: Download/update ngrams
+  ansible.builtin.include_tasks:
+    file: get_ngrams.yml
+
+- name: Deploy LanguageTool container
+  community.docker.docker_container:
+    name: languagetool
+    image: erikvl87/languagetool:6.5
+    restart_policy: always
+    ports:
+      - 8020:8010
+      - 8021:8011 # Prometheus
+    volumes:
+      - /opt/languagetool/ngrams:/ngrams
+    env:
+      # https://languagetool.org/development/api/org/languagetool/server/HTTPServerConfig.html
+      langtool_languageModel: /ngrams
+      langtool_pipelinePrewarming: 'true'
+      langtool_cacheSize: '1000'
+      langtool_premiumAlways: 'true'
+      langtool_preferredLanguages: 'en-GB'
+      langtool_prometheusMonitoring: 'true'
+      langtool_prometheusPort: '8011'
+      langtool_trustXForwardForHeader: 'true'
+      Java_Xms: 512m
+      Java_Xmx: 1g
+    state: started
+  notify: Prune Docker images

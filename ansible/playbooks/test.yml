@@ -1,0 +1,4 @@
+---
+- name: debug
+  ansible.builtin.debug:
+    msg: "{{ lookup('bws_cache', ansible_passwordword).value }}"

@@ -1,0 +1,11 @@
+---
+- name: Enable nfs
+  ansible.builtin.systemd_service:
+    name: nfs-kernel-server.service
+    state: started
+    enabled: true
+
+- name: Reload nfs
+  ansible.builtin.command:
+    cmd: 'exportfs -ra'
+  changed_when: true

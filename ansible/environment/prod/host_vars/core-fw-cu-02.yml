@@ -1,0 +1,37 @@
+opnsense_api_key: "{{ lookup('bws_cache', 'opns_cfw2_api_key').value }}"
+opnsense_api_secret: "{{ lookup('bws_cache', 'opns_cfw2_api_secret').value }}"
+opnsense_api_access_secret: "{{ lookup('bws_cache', 'opns_cfw2_api_access_secret').value }}"
+
+
+bootstrap_opnsense_network_info:
+  ip: 10.0.1.3
+  subnet: 24
+  name: mgmt
+
+configure_opnsense_vip_info:
+  advertising_base: 1
+  advertising_skew: 100
+
+configure_opnsense_haconfig:
+  interface: fw_cluster_pfsync
+  ip: 10.1.4.1
+
+configure_opnsense_hostinfo:
+  domain: int.ripplefcl.com
+  hostname: "{{ inventory_hostname }}"
+
+configure_opnsense_interfaces_overrides:
+  mgmt:
+    ipaddr: "10.0.1.3"
+  lan:
+    ipaddr: "10.0.2.3"
+  wlan:
+    ipaddr: "10.0.4.3"
+  guest_wlan:
+    ipaddr: "10.0.5.3"
+  vm_network:
+    ipaddr: "10.0.6.3"
+  ir_transit:
+    ipaddr: "10.1.2.4"
+  fw_cluster_pfsync:
+    ipaddr: "10.1.4.2"

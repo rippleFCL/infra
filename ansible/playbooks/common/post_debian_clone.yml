@@ -1,0 +1,33 @@
+---
+- name: 'Bootstrap vm'
+  hosts: debian
+  become: true
+  tasks:
+    - name: Configure extra disks
+      ansible.builtin.include_role:
+        name: setup_disk
+      vars:
+        disk_device: "{{ item.device }}"
+        disk_partition: "{{ item.partition }}"
+        disk_name: "{{ item.name }}"
+        mountpoint_path: "{{ item.mountpoint }}"
+        mountpoint_mode: "{{ item.mountpoint_mode | default(omit) }}"
+        mountpoint_owner: "{{ item.mountpoint_owner | default(omit) }}"
+        mountpoint_group: "{{ item.mountpoint_group | default(omit) }}"
+      loop: "{{ disk_map | default([]) }}"
+      loop_control:
+        label: "{{ item.name | default(None) }}"
+
+    - name: Post debian clone
+      ansible.builtin.include_role:
+        name: post_debian_clone
+
+    - name: Setup nmcli
+      ansible.builtin.include_role:
+        name: nmcli
+        
+- name: 'Bootstrap vm'
+  hosts: docker_hosts
+  become: true
+  roles:
+    - geerlingguy.docker

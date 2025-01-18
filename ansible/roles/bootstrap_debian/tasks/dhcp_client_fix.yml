@@ -1,0 +1,5 @@
+- name: DHCP Client ID fix
+  ansible.builtin.lineinfile:
+    dest: /etc/dhcp/dhclient.conf
+    regexp: '^(#send dhcp-client-identifier 1:0:a0:24:ab:fb:9c;)$'
+    line: 'send dhcp-client-identifier = hardware;'

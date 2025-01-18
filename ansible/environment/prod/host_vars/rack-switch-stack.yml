@@ -1,0 +1,73 @@
+configure_switch_vlans:
+  - name: mgmt
+    tagged_ports:
+      - 1/3/1 to 1/3/8
+      - 2/3/1 to 2/3/7
+    untagged_ports:
+      - 1/1/1 to 1/1/14
+      - 1/1/21 to 1/1/24
+      - 2/1/1 to 2/1/7
+      - 2/1/9 to 2/1/13
+      - 2/1/21 to 2/1/24
+  - name: lan
+    tagged_ports:
+      - 1/3/6 to 1/3/8
+      - 2/3/6 to 2/3/7
+  - name: dmz
+    tagged_ports:
+      - 1/3/6 to 1/3/7
+      - 2/3/6 to 2/3/7
+  - name: wlan
+    tagged_ports:
+      - 1/3/6 to 1/3/8
+      - 2/3/6 to 2/3/7
+    untagged_ports:
+      - 2/1/8
+      - 1/1/19
+  - name: guest_wlan
+    tagged_ports:
+      - 1/3/6 to 1/3/8
+      - 2/3/6 to 2/3/7
+  - name: vm_network
+    tagged_ports:
+      - 1/3/1 to 1/3/8
+      - 2/3/1 to 2/3/7
+  - name: esxi_storage
+    tagged_ports:
+      - 1/3/1 to 1/3/7
+      - 2/3/1 to 2/3/7
+  - name: esxi_migration
+    tagged_ports:
+      - 1/3/1 to 1/3/7
+      - 2/3/1 to 2/3/7
+  - name: vm_storage
+    tagged_ports:
+      - 1/3/1 to 1/3/7
+      - 2/3/1 to 2/3/7
+  - name: ir_transit
+    tagged_ports:
+      - 1/3/6 to 1/3/7
+      - 2/3/6 to 2/3/7
+  - name: wan_transit
+    tagged_ports:
+      - 1/3/6 to 1/3/7
+      - 2/3/6 to 2/3/7
+    untagged_ports:
+      - 1/1/20
+      - 2/1/19
+  - name: fw_cluster_pfsync
+    tagged_ports:
+      - 1/3/6 to 1/3/7
+      - 2/3/6 to 2/3/7
+
+configure_switch_netconfig: "{{ network_spec }}"
+
+ansible_network_os: community.network.icx
+ansible_connection: ansible.netcommon.network_cli
+ansible_become: true
+ansible_become_method: enable
+ansible_host: 10.0.1.6
+
+ansible_user: root
+ansible_password: "{{ lookup('bws_cache', 'ripple_user_password').value }}"
+

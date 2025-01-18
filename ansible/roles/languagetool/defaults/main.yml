@@ -1,0 +1,5 @@
+---
+
+languagetool_dir: "{{ (app_base_dir, 'languagetool') | path_join }}"
+
+languagetool_ngrams_version_path: "{{ (languagetool_dir, 'ngrams_version') | path_join }}"

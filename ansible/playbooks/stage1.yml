@@ -1,0 +1,9 @@
+---
+- name: Run debian post clone
+  ansible.builtin.import_playbook: common/post_debian_clone.yml
+
+- name: Run vyos post clone
+  ansible.builtin.import_playbook: networking/init_vyos_deploy.yml
+
+- name: Run nas deploy
+  ansible.builtin.import_playbook: storage/deploy_nas.yml

@@ -1,0 +1,10 @@
+---
+- name: Deploy users
+  hosts: switches
+  # gather_facts: False
+  vars:
+
+  tasks:
+    - name: "Setup vlans"
+      ansible.builtin.include_role:
+        name: configure_switch

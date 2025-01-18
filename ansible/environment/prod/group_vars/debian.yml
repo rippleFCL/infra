@@ -1,0 +1,11 @@
+domain: int.ripplefcl.com
+post_debian_clone_domain: "{{ domain }}"
+
+setup_users_primary:
+  - username: ripple
+    password: "{{ lookup('bws_cache', 'ripple_user_hashed_password').value }}"
+    ssh_keys: ["{{ lookup('bws_cache', 'ripple_sshkey_pub').value }}"]
+  - username: ansible
+    sudo: true
+    password: "{{ lookup('bws_cache', 'ansible_user_hashed_password').value }}"
+    ssh_keys: ["{{ lookup('bws_cache', 'ripple_sshkey_pub').value }}"]

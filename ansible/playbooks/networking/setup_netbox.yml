@@ -1,0 +1,13 @@
+---
+- name: Deploy users
+  hosts: netbox
+  # gather_facts: False
+  vars:
+
+  tasks:
+    # - name: Ping
+    #   ansible.builtin.ping:
+
+    - name: "Setup netbox"
+      ansible.builtin.include_role:
+        name: setup_netbox

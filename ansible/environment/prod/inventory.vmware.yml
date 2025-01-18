@@ -1,0 +1,28 @@
+plugin: vmware_vm_inventory
+strict: false
+hostname: vcsa.int.ripplefcl.com
+username: administrator@vsphere.local
+password: "{{ lookup('bws_cache', 'vsphere_password').value }}"
+validate_certs: false
+with_tags: true
+hostnames:
+  - 'config.name.replace("-prod", "")'
+compose:
+  ansible_host: "guest.net | vmware_ip_filter('10.0.1.0/24', '10.0.2.0/24', '10.0.6.0/24')"
+  subdomain_name: '({True:"int.", False:""}["internal-services" in tags] or {True:"ext.", False:""}["external-services" in tags])+"prod"'
+  hostname: 'config.name.replace("-prod", "")'
+properties:
+  - "config.name"
+  - "config.guestId"
+  - "guest.ipAddress"
+  - "summary.runtime.powerState"
+  - "guest.ipStack"
+  - "guest.net"
+keyed_groups:
+  - key: tags
+    # prefix: "vsphere"
+    # parent_group: "${tags}"
+    separator: ""
+filters:
+  - "'-prod' in config.name"
+with_nested_properties: true

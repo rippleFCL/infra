@@ -1,0 +1,93 @@
+---
+
+- name: Run checks
+  check_mode: true
+  block:
+    - name: Check for pending changes to VLAN interfaces
+      community.routeros.api_modify:
+        path: interface vlan
+        data: "{{ mt_vlan_interfaces }}"
+        handle_absent_entries: remove
+        handle_entries_content: remove_as_much_as_possible
+      tags: ["interfaces", "vlan"]
+      register: check_vlan_interfaces
+
+    - name: Check for pending changes to addresses
+      community.routeros.api_modify:
+        path: ip address
+        data: "{{ mt_addresses }}"
+        handle_absent_entries: remove
+        handle_entries_content: remove_as_much_as_possible
+      tags: ["interfaces", "address"]
+      register: check_addresses
+
+    - name: Check for pending changes to bridge port(s)
+      community.routeros.api_modify:
+        path: interface bridge port
+        data: "{{ lookup('tikify', 'ports') }}"
+        handle_absent_entries: remove
+        handle_entries_content: remove_as_much_as_possible
+      tags: ["interfaces", "bridge"]
+      register: check_bridge_ports
+
+    - name: Check for pending changes to bridge VLANs
+      community.routeros.api_modify:
+        path: interface bridge vlan
+        data: "{{ lookup('tikify', 'vlans') }}"
+        handle_absent_entries: remove
+        handle_entries_content: remove_as_much_as_possible
+      tags: ["interfaces", "bridge"]
+      register: check_bridge_vlans
+
+- name: Configure bridges without VLAN filtering if there are no changes to be applied
+  community.routeros.api_modify:
+    path: interface bridge
+    data: "{{ mt_bridges | map('ansible.utils.remove_keys', ['frame-types', 'vlan-filtering']) }}"
+    handle_absent_entries: remove
+    handle_entries_content: remove_as_much_as_possible
+  tags: ["interfaces", "bridge"]
+  when: >-
+    check_vlan_interfaces is changed or
+    check_addresses is changed or
+    check_bridge_ports is changed or
+    check_bridge_vlans is changed
+
+- name: Configure VLAN interfaces
+  community.routeros.api_modify:
+    path: interface vlan
+    data: "{{ mt_vlan_interfaces }}"
+    handle_absent_entries: remove
+    handle_entries_content: remove_as_much_as_possible
+  tags: ["interfaces", "vlan"]
+
+- name: Configure addresses
+  community.routeros.api_modify:
+    path: ip address
+    data: "{{ mt_addresses }}"
+    handle_absent_entries: remove
+    handle_entries_content: remove_as_much_as_possible
+  tags: ["interfaces", "address"]
+
+- name: Configure bridge port(s)
+  community.routeros.api_modify:
+    path: interface bridge port
+    data: "{{ lookup('tikify', 'ports') }}"
+    handle_absent_entries: remove
+    handle_entries_content: remove_as_much_as_possible
+  tags: ["interfaces", "bridge"]
+
+- name: Configure bridge VLANs
+  community.routeros.api_modify:
+    path: interface bridge vlan
+    data: "{{ lookup('tikify', 'vlans') }}"
+    handle_absent_entries: remove
+    handle_entries_content: remove_as_much_as_possible
+  tags: ["interfaces", "bridge"]
+
+- name: Configure bridges
+  community.routeros.api_modify:
+    path: interface bridge
+    data: "{{ mt_bridges }}"
+    handle_absent_entries: remove
+    handle_entries_content: remove_as_much_as_possible
+  tags: ["interfaces", "bridge"]

@@ -1,0 +1,16 @@
+- name: Reboot Machine (will timeout) # noqa: ignore-errors
+  ansible.builtin.reboot:
+  timeout: 60
+  ignore_errors: true
+
+- name: Reload Inventory
+  ansible.builtin.meta: refresh_inventory
+
+- name: Wait for system to come back up
+  ansible.builtin.wait_for:
+    host: "{{ ansible_host }}"
+    timeout: 120
+
+- name: New ip
+  ansible.builtin.debug:
+    msg: "{{ ansible_host }}"

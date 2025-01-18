@@ -1,0 +1,18 @@
+---
+- name: Create dhcp container
+  community.general.docker_container:
+    name: "kea-dhcp4"
+    image: "jonasal/kea-dhcp4:2"
+    pull: yes
+    state: started
+    restart: true
+    restart_policy: always
+    command: "-c /kea/config/dhcp4.json"
+    volumes:
+      - "{{ kea_container_base_dir }}/config:/kea/config:ro"
+      - "{{ kea_container_base_dir }}/leases:/kea/leases"
+      - "{{ kea_container_base_dir }}/logs:/kea/logs"
+      - "{{ kea_container_base_dir }}/sockets:/kea/sockets"
+      - "{{ kea_container_base_dir }}/entrypoint.d:/entrypoint.d:ro"
+    network_mode: host
+    purge_networks: true

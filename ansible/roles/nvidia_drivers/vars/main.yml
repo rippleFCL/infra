@@ -1,0 +1,3 @@
+---
+
+release: "{{ ansible_facts.lsb.id | lower + ansible_facts.lsb.major_release }}"

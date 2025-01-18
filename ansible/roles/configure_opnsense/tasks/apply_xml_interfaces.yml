@@ -1,0 +1,22 @@
+- name: Add pppoe interfaces
+  community.general.xml:
+    path: /conf/config.xml
+    xpath: /opnsense/ppps
+    set_children: "{{ configure_opnsense_pppoe_interfaces | interface2xml }}"
+    pretty_print: true
+  when: configure_opnsense_pppoe_interfaces is defined
+  notify: Reload opnsense
+
+- name: Assign interfaces
+  community.general.xml:
+    path: /conf/config.xml
+    xpath: /opnsense/interfaces
+    set_children: >-
+      {{
+      configure_opnsense_interfaces |
+      interface_constructor(configure_opnsense_interfaces_overrides, configure_opnsense_network_spec) |
+      interface2xml
+      }}
+    pretty_print: true
+  when: configure_opnsense_interfaces is defined
+  notify: Reload opnsense

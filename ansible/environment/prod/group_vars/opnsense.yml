@@ -1,0 +1,12 @@
+bootstrap_opnsense_pkgs:
+  - open-vm-tools-nox11
+  - nano
+
+bootstrap_opnsense_password: "{{ lookup('bws_cache', 'opnsense_password').value }}"
+bootstrap_opnsense_auth_ssh_key: "{{ lookup('bws_cache', 'opnsense_auth_ssh_key').value }}"
+
+ansible_user: root
+
+configure_opnsense_network_spec: "{{ network_spec }}"
+
+configure_opnsense_theme: cicada

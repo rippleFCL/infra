@@ -1,0 +1,12 @@
+kea_dhcp_subnets:
+  - subnet: 10.0.1.0/24
+    pools:
+      - pool: "10.0.1.200 - 10.0.1.254"
+    option-data:
+
+      - name: "routers"
+        data: "10.0.1.10"
+
+      - name: "domain-name-servers"
+        data: "{{ ansible_host }}"
+

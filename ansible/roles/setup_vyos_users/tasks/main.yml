@@ -1,0 +1,26 @@
+---
+- name: add ansible user
+  vyos.vyos.vyos_user:
+    name: ansible
+    configured_password: "{{ ansible_user_password }}"
+    update_password: on_create
+    state: present
+
+- name: adding ssh keys to ansible
+  vyos.vyos.vyos_config:
+    lines:
+     - "set system login user ansible authentication public-keys root@ansible type ssh-ed25519"
+     - "set system login user ansible authentication public-keys root@ansible key {{ ssh_key }}"
+
+- name: add ripple user
+  vyos.vyos.vyos_user:
+    name: ripple
+    configured_password: "{{ default_user_password }}"
+    update_password: on_create
+    state: present
+
+- name: adding ssh keys to ripple
+  vyos.vyos.vyos_config:
+    lines:
+     - "set system login user ripple authentication public-keys root@ansible type ssh-ed25519"
+     - "set system login user ripple authentication public-keys root@ansible key {{ ssh_key }}"

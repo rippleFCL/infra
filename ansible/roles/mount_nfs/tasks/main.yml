@@ -1,0 +1,22 @@
+- name: Install nfs
+  ansible.builtin.apt:
+    name: nfs-common
+    state: present
+  when: mount_nfs_shares is defined
+
+- name: Creates directory
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    mode: '0755'
+    state: directory
+  loop: "{{ mount_nfs_shares | default([]) }}"
+
+
+- name: Mount an NFS volume
+  ansible.posix.mount:
+    src: "{{ item.share }}"
+    path: "{{ item.path }}"
+    opts: "{{ item.opts }}"
+    state: mounted
+    fstype: nfs
+  loop: "{{ mount_nfs_shares | default([]) }}"

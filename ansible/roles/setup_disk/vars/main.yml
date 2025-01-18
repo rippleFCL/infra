@@ -1,0 +1,8 @@
+---
+
+partition_path: >-
+  {{
+  disk_device + 'p' + disk_partition if disk_device.startswith('/dev/nvme')
+  else disk_device + disk_partition if disk_device.startswith('/dev/sd')
+  else null | mandatory('Only /dev/nvme* and /dev/sd* device paths are supported')
+  }}

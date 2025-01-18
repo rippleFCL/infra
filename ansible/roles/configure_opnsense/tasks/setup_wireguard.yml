@@ -1,0 +1,44 @@
+- name: Enabling WireGuard service
+  ansibleguy.opnsense.wireguard_general:
+    enabled: true
+
+- name: Add wireguard peers
+  ansibleguy.opnsense.wireguard_peer:
+    name: "{{ item.name }}"
+    endpoint: "{{ item.endpoint | default(omit) }}"
+    allowed_ips: "{{ item.allowed_ips }}"
+    public_key: "{{ item.public_key }}"
+    psk: "{{ item.psk | default(omit) }}"
+    port: "{{ item.port | default(omit) }}"
+    keepalive: "{{ item.keepalive | default(omit) }}"
+    reload: false
+  loop: "{{ configure_opnsense_wireguard['peers'] }}"
+  when: configure_opnsense_wireguard['peers'] is defined
+  register: wireguard
+
+- name: Reload wireguard
+  ansibleguy.opnsense.reload:
+    target: 'wireguard'
+  when: wireguard.changed # noqa: no-handler
+
+- name: Add wireguard Server
+  ansibleguy.opnsense.wireguard_server:
+    name: "{{ item.name }}"
+    peers: "{{ item.peers }}"
+    tunnel_ips: "{{ item.tunnel_ips }}"
+    public_key: "{{ item.public_key }}"
+    private_key: "{{ item.private_key }}"
+    port: "{{ item.port }}"
+    mtu: "{{ item.mtu | default(omit) }}"
+    dns_servers: "{{ item.dns_servers | default(omit) }}"
+    disable_routes: "{{ item.disable_routes | default(omit) }}"
+    gateway: "{{ item.gateway | default(omit) }}"
+    vip: "{{ item.vip | default(omit) }}"
+    reload: false
+  loop: "{{ configure_opnsense_wireguard['server'] }}"
+  when: configure_opnsense_wireguard['server'] is defined
+
+- name: Reload wireguard
+  ansibleguy.opnsense.reload:
+    target: 'wireguard'
+  when: wireguard.changed # noqa: no-handler

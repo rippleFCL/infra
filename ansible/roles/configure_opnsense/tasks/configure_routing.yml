@@ -1,0 +1,37 @@
+- name: Add gateways
+  ansibleguy.opnsense.gateway:
+    name: "{{ item.name }}"
+    interface: "{{ configure_opnsense_interfaces[item.interface]['identifier'] }}"
+    gateway: "{{ item.gateway }}"
+    monitor: "{{ item.monitor | default(omit) }}"
+    priority: "{{ item.priority | default(omit) }}"
+    weight: "{{ item.weight | default(omit) }}"
+    monitor_disable: false
+    default_gw: "{{ item.default | default(omit) }}"
+    reload: false
+  loop: "{{ configure_opnsense_gateways }}"
+  when: configure_opnsense_gateways is defined
+  register: gateways
+
+- name: Reload gateways
+  ansibleguy.opnsense.reload:
+    target: "route"
+  delegate_to: localhost
+  when: gateways.changed # noqa: no-handler
+
+- name: Add routes
+  ansibleguy.opnsense.route:
+    gateway: "{{ item.gateway }}"
+    network: "{{ item.network }}"
+    description: "{{ item.description }}"
+  loop: "{{ configure_opnsense_routes }}"
+  when: configure_opnsense_routes is defined
+  register: routes
+  retries: 5
+  delay: 5
+
+- name: Reload routes
+  ansibleguy.opnsense.reload:
+    target: "route"
+  delegate_to: localhost
+  when: routes.changed # noqa: no-handler

@@ -1,0 +1,13 @@
+- name: Setup dns forwarding
+  ansibleguy.opnsense.unbound_forward:
+    domain: "{{ item.domain | default('') }}"
+    server: "{{ item.server }}"
+    port: "{{ item.port | default(omit) }}"
+    reload: false
+  loop: "{{ configure_opnsense_dns_forwarding }}"
+  register: dns_forwarding
+
+- name: Reload dns forwarding
+  ansibleguy.opnsense.reload:
+    target: unbound
+  when: dns_forwarding.changed # noqa: no-handler

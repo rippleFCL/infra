@@ -1,0 +1,50 @@
+---
+
+DOCUMENTATION:
+  name: tikify
+  author: tigattack (@tigattack)
+  short_description: Manipulate MikroTik RouterOS bridge port and VLAN information
+  description:
+    - This lookup plugin restructures a simplified list of ports and VLANs for compliancy with the community.routeros.api_modify schema.
+  options:
+    _terms:
+      description: Data type to return (optional)
+      choices: ['all', 'ports', 'vlans']
+      default: 'all'
+      required: false
+      type: str
+    bridge_ports_var:
+      description: Variable name for bridge ports (optional)
+      default: mt_bridge_ports
+      required: false
+      type: str
+    bridge_vlans_var:
+      description: Variable name for bridge VLANs (optional)
+      default: mt_bridge_vlans
+      required: false
+      type: str
+    bridge_vlan_extra_interfaces_var:
+      description: Variable name for bridge VLAN extra interfaces (optional)
+      default: mt_bridge_vlan_extra_interfaces
+      required: false
+      type: str
+
+EXAMPLES: |
+  - name: "Get manipulated bridge ports"
+    ansible.builtin.debug:
+      msg: "{{ lookup('tikify', 'ports') }}"
+
+  - name: "Get manipulated bridge VLANs"
+    ansible.builtin.debug:
+      msg: "{{ lookup('tikify', 'vlans') }}"
+
+  - name: "Get all manipulated bridge data"
+    ansible.builtin.debug:
+      msg: "{{ lookup('tikify') }}"
+
+RETURN:
+  _raw:
+    description: List of bridge ports or bridge VLANs as specified
+    type: list[dict]
+    returned: success
+    sample: [{"bridge": "bridge1", "interface": "ether1", "comment": "uplink"}]

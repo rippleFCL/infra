@@ -1,0 +1,8 @@
+---
+- name: Setup user's autherised ssh key
+  ansible.posix.authorized_key:
+    user: "{{ userdata.username }}"
+    state: present
+    key: "{{ item }}"
+  loop: "{{ userdata.ssh_keys }}"
+  when: userdata.ssh_keys is defined

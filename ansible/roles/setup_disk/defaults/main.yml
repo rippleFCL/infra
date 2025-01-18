@@ -1,0 +1,38 @@
+---
+
+# Disk options ====================================
+
+# e.g. /dev/nvme0n2
+disk_device: null
+
+# e.g. 1
+disk_partition: null
+
+# e.g. MyVol
+disk_name: null
+
+# Mount options ===================================
+
+# e.g. /mnt/myvol
+mountpoint_path: null
+mountpoint_owner: root
+mountpoint_group: root
+mountpoint_mode: '0755'
+
+# See ansible.posix.mount 'opt' argument
+mount_opts: defaults
+
+# See ansible.posix.mount 'passno' argument
+mount_passno: 2
+
+# Mount on boot
+mount_boot: true
+
+
+# Partition options ===============================
+
+# See community.general.parted 'label' argument
+partition_label: gpt
+
+# See community.general.filesystem 'fstype' argument
+partition_fstype: ext4

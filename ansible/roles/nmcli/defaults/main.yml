@@ -1,0 +1,7 @@
+nmcli_interfaces: []
+zfs_pool_config:
+  - name: "hdd-pool"
+    options:
+      compression: lz4
+    vdevs:
+      - type: 

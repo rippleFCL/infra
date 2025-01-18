@@ -1,0 +1,28 @@
+kea_container_base_dir: "/etc/kea"
+
+kea_dhcp_interfaces: ["*"]
+
+kea_dhcp_subnets: []
+
+kea_dhcp_parked_packet_limit: 128
+kea_dhcp_valid_lifetime: 6000
+kea_dhcp_renew_timer: 900
+kea_dhcp_rebind_timer: 1000
+
+kea_logging_pattern: "%D{ %Y-%m-%d %H:%M:%S.%q } %-5p [%c/%i.%t] %m\n"
+kea_logging_severity: "INFO"
+kea_logging_debuglevel: 0
+kea_logging_maxsize: 10485760 # 10 MB
+kea_logging_maxver: 3
+
+kea_logging_raw_dhcp:
+  - name: "kea-dhcp4"
+    severity: "{{ kea_logging_severity }}"
+    debuglevel: "{{ kea_logging_debuglevel }}"
+    output_options:
+      - output: "stdout"
+        pattern: "{{ kea_logging_pattern }}"
+      - output: "/kea/logs/dhcp4.log"
+        pattern: "{{ kea_logging_pattern }}"
+        maxsize: "{{ kea_logging_maxsize }}"
+        maxver: "{{ kea_logging_maxver }}"

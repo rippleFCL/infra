@@ -1,0 +1,23 @@
+- name: Install packages
+  ansibleguy.opnsense.package:
+    name: "{{ configure_opnsense_packages }}"
+    action: install
+  failed_when: false
+  register: packages_rs
+
+- name: Update system
+  ansibleguy.opnsense.system:
+    action: upgrade
+  when: packages_rs.failed and configure_opnsense_upgrade is defined
+
+- name: Warning need update
+  ansible.builtin.debug:
+    msg: system needs update but configure_opnsense_upgrade isnt defined or passed
+  when: packages_rs.failed and configure_opnsense_upgrade is not defined
+
+- name: Install packages
+  ansibleguy.opnsense.package:
+    name: "{{ configure_opnsense_packages }}"
+    action: install
+  failed_when: false
+  when: packages_rs.failed and configure_opnsense_upgrade is defined

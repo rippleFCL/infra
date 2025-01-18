@@ -1,0 +1,11 @@
+---
+- name: Install nmcli
+  ansible.builtin.apt:
+    name: network-manager
+    state: "present"
+
+- name: Start network manager service
+  ansible.builtin.systemd:
+    name: NetworkManager
+    state: "started"
+    enabled: true

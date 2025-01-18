@@ -1,0 +1,9 @@
+---
+
+- name: test
+  hosts: debian
+
+  tasks:
+    - name: Test
+      ansible.builtin.debug:
+        var: internal_domain

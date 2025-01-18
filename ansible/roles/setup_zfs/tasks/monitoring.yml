@@ -1,0 +1,22 @@
+---
+- name: Scheduling zpool scrubs
+  ansible.builtin.cron:
+    name: "{{ scrub_data.pool }} zpool scrub"
+    cron_file: zpool_scrub
+    user: root
+    minute: "{{ scrub_data.minute | default(omit) }}"
+    hour: "{{ scrub_data.hour | default(omit) }}"
+    day: "{{ scrub_data.day | default(omit) }}"
+    month: "{{ scrub_data.month | default(omit) }}"
+    weekday: "{{ scrub_data.weekday | default(omit) }}"
+    job: "/sbin/zpool scrub {{ scrub_data.pool }}"
+
+  loop: "{{ setup_zfs_monitoring }}"
+  loop_control:
+    loop_var: scrub_data
+# zfsutils-linux comes with a scrub cron job.
+# It is removed if at least one zpool scrub is defined.
+- name: Removing zfsutils-linux cron job
+  ansible.builtin.file:
+    dest: /etc/cron.d/zfsutils-linux
+    state: absent

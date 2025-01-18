@@ -1,0 +1,13 @@
+nmcli_interfaces:
+  - name: ens192
+    method: auto
+
+  - name: ens256
+    method: manual
+    ip: 10.2.3.11/24
+
+deploy_docker_roles:
+  - languagetool
+
+deploy_docker_services:
+  - taskin

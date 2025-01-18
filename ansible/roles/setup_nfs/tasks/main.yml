@@ -1,0 +1,11 @@
+---
+- name: Install nfs
+  ansible.builtin.include_tasks:
+    file: install.yml
+  when: setup_nfs_exports is defined
+
+
+- name: Deploy nfs
+  ansible.builtin.include_tasks:
+    file: deploy.yml
+  when: setup_nfs_exports is defined

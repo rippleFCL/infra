@@ -1,0 +1,9 @@
+---
+- name: Set nfs exports
+  ansible.builtin.template:
+    src: nfs.j2
+    dest: /etc/exports
+    owner: root
+    group: root
+    mode: "0644"
+  notify: Reload nfs

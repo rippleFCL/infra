@@ -1,0 +1,21 @@
+---
+- name: Deploy users
+  hosts: opnsense
+  serial: 1
+  module_defaults:
+    group/ansibleguy.opnsense.all:
+      firewall: "{{ ansible_host }}"
+      api_key: "{{ opnsense_api_key }}"
+      api_secret: "{{ opnsense_api_access_secret }}"
+      ssl_verify: false
+      api_retries: 5
+      api_timeout: 5
+
+  tasks:
+    - name: Teat
+      ansible.builtin.debug:
+        msg: "{{ opnsense_api_key }} {{ opnsense_api_secret }}"
+
+    - name: "Configure opnsense"
+      ansible.builtin.include_role:
+        name: configure_opnsense

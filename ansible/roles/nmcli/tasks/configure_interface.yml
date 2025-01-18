@@ -1,0 +1,48 @@
+---
+
+- name: Remove inferior service
+  ansible.builtin.lineinfile:
+    path: /etc/network/interfaces
+    regexp: "{{ item }}"
+    state: absent
+  loop:
+    - "^allow-hotplug {{ nmcli_interface.name }}"
+    - "^auto {{ nmcli_interface.name }}.*"
+    - "^iface {{ nmcli_interface.name }}.*"
+
+- name: Restart network manager service
+  ansible.builtin.systemd:
+    name: NetworkManager
+    state: "restarted"
+    enabled: true
+
+- name: Setup ips
+  community.general.nmcli:
+    conn_name: "{{ nmcli_interface.name }}"
+    ifname: "{{ nmcli_interface.name }}"
+    type: ethernet
+    method4: "{{ nmcli_interface.get('method', omit) }}"
+    ip4: "{{ nmcli_interface.get('ip', omit) }}"
+    gw4: "{{ nmcli_interface.get('gateway', omit) }}"
+    dns4: "{{ nmcli_interface.get('dns', omit) }}"
+    state: present
+    conn_reload: false
+  register: ip_info
+  become: true
+
+- name: Ip change # noqa: no-handler
+  ansible.builtin.include_tasks:
+    file: handle_ip_change.yml
+  when: ip_info.changed
+
+- name: Setup netbox ip addresses
+  netbox.netbox.netbox_ip_address:
+    netbox_url: "{{ netbox_url }}"
+    netbox_token: "{{ netbox_token }}"
+    data:
+      address: "{{ nmcli_interface.ip }}"
+      description: "{{ nmcli_interface.name }} nmcli managed"
+    validate_certs: false
+    state: present
+  when: nmcli_interface.ip is defined and allow_net_box
+  delegate_to: localhost

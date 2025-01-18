@@ -1,0 +1,163 @@
+opnsense_api_key: "{{ lookup('bws_cache', 'opns_gwfw_api_key').value }}"
+opnsense_api_secret: "{{ lookup('bws_cache', 'opns_gwfw_api_secret').value }}"
+opnsense_api_access_secret: "{{ lookup('bws_cache', 'opns_gwfw_api_access_secret').value }}"
+ansible_host: 10.1.2.1
+# bootstrap_opnsense_network_info:
+#   ip: 10.0.1.1
+#   subnet: 24
+#   name: mgmt
+
+configure_opnsense_pppoe_interfaces:
+  - identifier: ppp
+    config:
+      ptpid: "0"
+      type: "pppoe"
+      if: "pppoe0"
+      ports: "vlan0.{{ network_spec['vlan']['wan_transit']['vlan_id'] }}"
+      username: "bthomehub@btbroadband.com"
+      password: "QlQ="
+      descr: "bt wan pppoe"
+
+configure_opnsense_interfaces:
+  ir_transit:
+    identifier: opt1
+    vlan: ir_transit
+
+  bt_wan:
+    identifier: opt2
+    config:
+      ipaddr: pppoe
+      if: pppoe0
+      blockpriv: "1"
+      blockbogons: "1"
+
+  Loopback:
+    identifier: lo0
+    config:
+      internal_dynamic: "1"
+      type: none
+      virtual: "1"
+      if: lo0
+      ipaddr: "127.0.0.1"
+      subnet: "8"
+      ipaddrv6: "::1"
+      subnetv6: "128"
+
+
+configure_opnsense_vlans:
+  wan_transit: vmx1
+  ir_transit: vmx1
+
+configure_opnsense_interfaces_overrides:
+  ir_transit:
+    ipaddr: "10.1.2.1"
+
+configure_opnsense_snat:
+  - description: lan snat
+    target: bt_wan
+    interface: bt_wan
+    source_net: "{{ network_spec['vlan']['lan']['network'] }}"
+
+  - description: vm_network snat
+    target: bt_wan
+    interface: bt_wan
+    source_net: "{{ network_spec['vlan']['vm_network']['network'] }}"
+
+  - description: wlan snat
+    target: bt_wan
+    interface: bt_wan
+    source_net: "{{ network_spec['vlan']['wlan']['network'] }}"
+
+  - description: guest_wlan snat
+    target: bt_wan
+    interface: bt_wan
+    source_net: "{{ network_spec['vlan']['guest_wlan']['network'] }}"
+
+  - description: guest_wlan snat
+    target: bt_wan
+    interface: bt_wan
+    source_net: "{{ network_spec['vlan']['mgmt']['network'] }}"
+
+configure_opnsense_fw_aliases:
+  - name: private_ips
+    type: network
+    content:
+      - "10.0.0.0/8"
+      - "172.16.0.0/12"
+      - "192.168.0.0/16"
+
+configure_opnsense_rule_blocks:
+  allow_all:
+    - description: "allow all"
+      action: "pass"
+
+
+  allow_icmp:
+    - description: "allow icmp"
+      action: "pass"
+      protocol: "ICMP"
+      destination:
+        ip: self
+
+  block_all:
+    - description: "block all"
+      action: "block"
+      quick: false
+
+configure_opnsense_rules:
+  - interface: ir_transit
+    rule_blocks:
+      - "allow_all"
+
+  - interface: bt_wan
+    rule_blocks:
+      - "allow_icmp"
+      - "block_private_out"
+      - "block_all"
+
+    local_rule_blocks:
+      block_private_out:
+        - description: "block private ips"
+          log: true
+          direction: "out"
+          action: "block"
+          source:
+            alias: private_ips
+
+configure_opnsense_general_settings:
+  dnsserver: "10.1.2.2"
+  timezone: Europe/London
+
+configure_opnsense_packages:
+  - os-ddclient
+  - os-theme-cicada
+
+configure_opnsense_dns_forwarding:
+  - server: "10.1.2.2"
+    domain: ripplefcl.com
+
+  - server: "10.1.2.2"
+    domain: ""
+
+configure_opnsense_gateways:
+  - name: fw_cu
+    interface: ir_transit
+    gateway: 10.1.2.2
+    priority: 255
+
+configure_opnsense_routes:
+  - gateway: fw_cu
+    network: "{{ network_spec['vlan']['lan']['network'] }}"
+    description: lan route
+  - gateway: fw_cu
+    network: "{{ network_spec['vlan']['wlan']['network'] }}"
+    description: wlan route
+  - gateway: fw_cu
+    network: "{{ network_spec['vlan']['guest_wlan']['network'] }}"
+    description: guest_wlan route
+  - gateway: fw_cu
+    network: "{{ network_spec['vlan']['vm_network']['network'] }}"
+    description: vm_network route
+  - gateway: fw_cu
+    network: "{{ network_spec['vlan']['mgmt']['network'] }}"
+    description: mgmt route

@@ -1,0 +1,41 @@
+- name: Check if provision happened
+  ansible.builtin.stat:
+    path: /etc/provisioned
+  register: st
+
+- name: Run post clone
+  when: not st.stat.exists
+  block:
+    - name: Set hostname
+      ansible.builtin.hostname:
+        name: "{{ inventory_hostname }}"
+
+    - name: Update /etc/hosts
+      ansible.builtin.lineinfile:
+        path: /etc/hosts
+        regexp: '^(127.0.1.1.*)$'
+        line: "127.0.1.1\t{{ inventory_hostname }}.{{ post_debian_clone_domain }}\t{{ inventory_hostname }}" # noqa no-tabs
+
+    - name: Reset machine ID # noqa no-free-form
+      ansible.builtin.shell:
+        cmd: |
+          rm -f /etc/machine-id /var/lib/dbus/machine-id &&
+          dbus-uuidgen --ensure=/etc/machine-id &&
+          dbus-uuidgen --ensure
+      changed_when: true
+
+    - name: Reset SSHD host keys # noqa no-free-form
+      ansible.builtin.shell:
+        cmd: rm -rf /etc/ssh/ssh_host* && dpkg-reconfigure openssh-server
+      changed_when: true
+
+    - name: Update and upgrade
+      ansible.builtin.apt:
+        update_cache: true
+        upgrade: full
+
+    - name: Add provisioned marker file
+      ansible.builtin.file:
+        path: /etc/provisioned
+        state: touch
+        mode: "0644"

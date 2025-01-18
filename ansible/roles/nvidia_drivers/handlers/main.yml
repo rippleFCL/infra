@@ -1,0 +1,9 @@
+---
+
+- name: Reboot
+  ansible.builtin.reboot:
+
+- name: Restart Docker
+  ansible.builtin.systemd:
+    name: docker
+    state: restarted

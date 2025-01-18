@@ -1,0 +1,19 @@
+- name: Set opnsense theme
+  community.general.xml:
+    path: /conf/config.xml
+    xpath: /opnsense/theme
+    value: "{{ configure_opnsense_theme }}"
+    pretty_print: true
+  when: configure_opnsense_theme is defined
+  notify: Reload opnsense
+
+
+- name: Set general settings
+  community.general.xml:
+    path: /conf/config.xml
+    xpath: /opnsense/system/{{ item.key }}
+    value: "{{ item.value }}"
+    pretty_print: true
+  when: configure_opnsense_general_settings is defined or configure_opnsense_hostinfo is defined
+  loop: "{{  configure_opnsense_general_settings | default(dict()) | combine(configure_opnsense_hostinfo | default(dict())) | dict2items }}"
+  notify: Reload opnsense

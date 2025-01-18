@@ -1,0 +1,51 @@
+
+- name: Apply fw rules
+  ansibleguy.opnsense.rule:
+    match_fields:
+      - sequence
+      - interface
+    sequence: "{{ item.index }}"
+    description: "{{ item.description }}"
+    action: "{{ item.action | default(omit) }}"
+    quick: "{{ item.quick | default(omit) }}"
+    interface: "{{ item.interface }}"
+    direction: "{{ item.direction | default(omit) }}"
+    protocol: "{{ item.protocol | default(omit) }}"
+    source_invert: "{{ item.source_invert | default(omit) }}"
+    source_net: "{{ item.source_net | default(omit) }}"
+    source_port: "{{ item.source_port | default(omit) }}"
+    destination_invert: "{{ item.destination_invert | default(omit) }}"
+    destination_net: "{{ item.destination_net | default(omit) }}"
+    destination_port: "{{ item.destination_port | default(omit) }}"
+    gateway: "{{ item.gateway | default(omit) }}"
+    log: "{{ item.log | default(false) }}"
+    enabled: "{{ item.enabled | default(omit) }}"
+    reload: false
+  loop: "{{ configure_opnsense_rules | rule_processor(configure_opnsense_rule_blocks, configure_opnsense_interfaces) }}"
+  loop_control:
+    label: "{{ item }}"
+
+  register: fw_rules
+
+
+- name: Pulling existing rules
+  ansibleguy.opnsense.list:
+    target: 'rule'
+  register: existing_entries
+
+- name: Purging unconfigured rules
+  ansibleguy.opnsense.rule:
+    state: 'absent'
+    interface: "{{ item.interface | first }}"
+    sequence: "{{ item.sequence }}"
+    match_fields: ['interface', 'sequence']
+
+  when: (configure_opnsense_rules | rule_purge_indexes(configure_opnsense_rule_blocks, configure_opnsense_interfaces))[item.interface | first] < item.sequence
+  loop: "{{ existing_entries.data }}"
+  register: fw_rules_purge
+
+- name: Reload fw rules
+  ansibleguy.opnsense.reload:
+    target: "rule"
+  delegate_to: localhost
+  when: fw_rules.changed or fw_rules_purge.changed # noqa: no-handler

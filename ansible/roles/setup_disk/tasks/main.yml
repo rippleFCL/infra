@@ -1,0 +1,58 @@
+---
+
+- name: Install parted
+  ansible.builtin.apt:
+    name: parted
+    state: present
+
+- name: Get partitions
+  community.general.parted:
+    device: "{{ disk_device }}"
+  register: disk_info
+- name: Partition and mount disk
+  when: not disk_info.partitions
+  block:
+    - name: Configure partition
+      community.general.parted:
+        device: "{{ disk_device }}"
+        number: "{{ disk_partition }}"
+        name: "{{ disk_name }}"
+        label: "{{ partition_label }}"
+        state: present
+      ignore_errors: "{{ ansible_check_mode }}"
+
+    - name: Create filesystem on partition
+      community.general.filesystem:
+        dev: "{{ partition_path }}"
+        fstype: "{{ partition_fstype }}"
+        state: present
+
+    - name: Mount partition (ephemeral)
+      ansible.posix.mount:
+        src: "{{ partition_path }}"
+        fstype: "{{ partition_fstype }}"
+        path: "{{ mountpoint_path }}"
+        opts: "{{ mount_opts }}"
+        state: ephemeral
+      changed_when: ansible_mounts | selectattr('device', 'equalto', partition_path) | list | length == 0
+
+    - name: Refresh mount facts
+      ansible.builtin.setup:
+        gather_subset: [mounts]
+
+    - name: Auto-mount partition with UUID
+      ansible.posix.mount:
+        src: UUID={{ (ansible_mounts | selectattr('device', 'eq', partition_path) | first).uuid }}
+        fstype: "{{ partition_fstype }}"
+        path: "{{ mountpoint_path }}"
+        opts: "{{ mount_opts }}"
+        passno: "{{ mount_passno }}"
+        boot: "{{ mount_boot }}"
+        state: present
+
+    - name: Set permissions on mount path
+      ansible.builtin.file:
+        path: "{{ mountpoint_path }}"
+        owner: "{{ mountpoint_owner }}"
+        group: "{{ mountpoint_group }}"
+        mode: "{{ mountpoint_mode }}"

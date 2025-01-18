@@ -1,0 +1,40 @@
+---
+- name: Deploy nas
+  hosts: docker_hosts
+  become: true
+  roles:
+    - role: nmcli
+    - role: setup_users
+    - role: nvidia_drivers
+      when: nvidia_drivers_install | default(false)
+      tags:
+        - nvidia_drivers
+
+    - role: mount_nfs
+    - role: languagetool
+      when: "'languagetool' in deploy_docker_roles | default([])"
+      tags:
+        - docker
+        - languagetool
+
+    - role: unifi_controller
+      when: "'unifi_controller' in deploy_docker_roles | default([])"
+      tags:
+        - docker
+        - unifi_controller
+  tasks:
+    - block:
+      - name: Ensure deb deps
+        ansible.builtin.apt:
+          name:
+            - python3-pip
+            - python3-yaml
+          state: present
+
+      - name: Create docker stack
+        community.docker.docker_compose_v2:
+          project_name: "{{ item }}"
+          definition: "{{ deploy_docker_service_definitions[item] }}"
+        loop: "{{ deploy_docker_services }}"
+      tags:
+        - docker

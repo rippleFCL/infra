@@ -1,0 +1,40 @@
+---
+- name: Installing pre-reqs
+  ansible.builtin.apt:
+    name:
+      - lsb-release
+    state: present
+
+- name: Install additional packages
+  ansible.builtin.apt:
+    pkg: "{{ backports_internal_additional_packages }}"
+    state: present
+  when: backports_internal_additional_packages | length > 0
+
+- name: Add backports repository
+  ansible.builtin.apt_repository:
+    repo: deb {{ backports_internal_uri }} {{ ansible_distribution_release }}-backports {{ backports_internal_components }}
+    state: present
+    update_cache: true
+  when: debian_use_backports
+
+- name: Install zfs
+  ansible.builtin.apt:
+    name:
+      - linux-headers-{{ ansible_kernel }}
+      - zfsutils-linux
+      - zfs-dkms
+    state: present
+
+- name: Enabling zfs module
+  community.general.modprobe:
+    name: zfs
+    state: present
+
+- name: Configuring ZFS
+  ansible.builtin.template:
+    src: etc/default/zfs.j2
+    dest: /etc/default/zfs
+    owner: root
+    group: root
+    mode: "0644"

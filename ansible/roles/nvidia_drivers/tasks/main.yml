@@ -1,0 +1,10 @@
+---
+
+- name: Install drivers
+  ansible.builtin.include_tasks:
+    file: drivers-cuda.yml
+
+- name: Install Container Toolkit
+  ansible.builtin.include_tasks:
+    file: container-toolkit.yml
+  when: install_container_toolkit

@@ -1,0 +1,7 @@
+---
+
+# List available versions: apt list -a cuda
+nvidia_cuda_pkg_version: ''
+
+install_container_toolkit: false
+nvidia_container_toolkit_pkg_version: ''

@@ -1,0 +1,45 @@
+- name: Managing filesystems
+  community.general.zfs:
+    name: "{{ dataset.name }}"
+    extra_zfs_properties:
+      volsize: "{{ dataset.options.volsize | default(omit) }}"
+      acltype: "{{ dataset.options.acltype | default(omit) }}"
+      atime: "{{ dataset.options.atime | default(omit) }}"
+      compression: "{{ dataset.options.compression | default(omit) }}"
+      dedup: "{{ dataset.options.dedup | default(omit) }}"
+      encryption: "{{ dataset.options.encryption | default(omit) }}"
+      keyformat: "{{ dataset.options.keyformat | default(omit) }}"
+      keylocation: "{{ dataset.options.keylocation | default(omit) }}"
+      logbias: "{{ dataset.options.logbias | default(omit) }}"
+      mountpoint: "{{ dataset.options.mountpoint | default(omit) }}"
+      primarycache: "{{ dataset.options.primarycache | default(omit) }}"
+      quota: "{{ dataset.options.quota | default(omit) }}"
+      refquota: "{{ dataset.options.refquota | default(omit) }}"
+      recordsize: "{{ dataset.options.recordsize | default(omit) }}"
+      sharenfs: "{{ dataset.options.sharenfs | default(omit) }}"
+      snapdev: "{{ dataset.options.snapdev | default(omit) }}"
+      snapdir: "{{ dataset.options.snapdir | default(omit) }}"
+      sync: "{{ dataset.options.sync | default(omit) }}"
+      xattr: "{{ dataset.options.xattr | default(omit) }}"
+    state: present
+  loop: "{{ zfs_pool_datasets | zfs_fs_preprocessor }}"
+  loop_control:
+    loop_var: dataset
+
+- name: Check pool exists
+  community.general.zfs_facts:
+    recurse: true
+    name: "{{ zfs_pool_datasets.pool }}"
+  register: zfs_info
+
+- name: Setting ZFS Filesystem Permissions
+  ansible.builtin.file:
+    path: "{{ zfs_info | zfs_fact_mount_extract(dataset_info.name) }}"
+    mode: "{{ dataset_info.mountpoint.mode | default(omit) }}"
+    owner: "{{ dataset_info.mountpoint.owner | default(omit) }}"
+    group: "{{ dataset_info.mountpoint.group | default(omit) }}"
+
+  loop: "{{ zfs_pool_datasets | zfs_fs_preprocessor }}"
+  loop_control:
+    loop_var: dataset_info
+  when: dataset_info.mountpoint is defined

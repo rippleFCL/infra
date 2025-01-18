@@ -1,0 +1,44 @@
+---
+# tasks file for ansible-zfs
+- name: Gather the package facts
+  ansible.builtin.package_facts:
+    manager: auto
+
+- name: Install zfs
+  ansible.builtin.include_tasks:
+    file: debian.yml
+  when: "not 'zfs-dkms' in ansible_facts.packages or not 'zfsutils-linux' in ansible_facts.packages"
+
+- name: Configuring zfs
+  ansible.builtin.include_tasks:
+    file: import_pool.yml
+  vars:
+    zfs_pool: "{{ item }}"
+  when: setup_zfs_pools is defined
+  loop: "{{ setup_zfs_pools }}"
+
+- name: Configuring zfs datasets
+  ansible.builtin.include_tasks:
+    file: datasets.yml
+  loop: "{{ setup_zfs_datasets }}"
+  loop_control:
+    loop_var: zfs_pool_datasets
+  when: setup_zfs_datasets is defined
+
+- name: Configuring zfs zvol
+  ansible.builtin.include_tasks:
+    file: zvols.yml
+  vars:
+    zfs_pool_zvols: "{{ item }}"
+  loop: "{{ setup_zfs_zvols }}"
+  when: setup_zfs_zvols is defined
+
+- name: Configure zfs tunables
+  ansible.builtin.include_tasks:
+    file: tune_zfs.yml
+  when: setup_zfs_perf_tuning is defined
+
+- name: Add zfs monitoring
+  ansible.builtin.include_tasks:
+    file: monitoring.yml
+  when: setup_zfs_monitoring is defined

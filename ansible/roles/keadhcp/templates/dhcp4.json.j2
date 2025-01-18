@@ -1,0 +1,28 @@
+{
+    "Dhcp4": {
+        "interfaces-config": {
+            "interfaces": {{ kea_dhcp_interfaces | to_nice_json(indent=4, ensure_ascii=False ) | indent(12, False) }},
+            "dhcp-socket-type": "raw"
+        },
+
+        // Specifies credentials to access lease database.
+        "lease-database": {
+            "type": "memfile",
+            "name": "/kea/leases/dhcp4.csv",
+            "lfc-interval": 3600
+        },
+
+
+        // Lease queue and lifetime values.
+        "parked-packet-limit": {{ kea_dhcp_parked_packet_limit | int }},
+        "valid-lifetime": {{ kea_dhcp_valid_lifetime | int }},
+        "renew-timer": {{ kea_dhcp_renew_timer | int }},
+        "rebind-timer": {{ kea_dhcp_rebind_timer | int }},
+
+
+        // We include the subnet file separately to make this one less cluttered.
+        <?include "/kea/config/subnet.json"?>
+
+        "loggers": {{ kea_logging_raw_dhcp | to_nice_json(indent=4, ensure_ascii=False ) | indent(8, False) }}
+    }
+}

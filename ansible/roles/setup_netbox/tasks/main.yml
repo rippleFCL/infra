@@ -1,0 +1,22 @@
+---
+- name: Add prefixes to netbox
+  netbox.netbox.netbox_prefix:
+    netbox_url: "{{ netbox_url }}"
+    netbox_token: "{{ netbox_token }}"
+    data:
+      prefix: "{{ item.prefix }}"
+      description: "{{ item.description }} vlan network"
+    state: present
+    validate_certs: false
+  loop: "{{ setup_netbox_prefix }}"
+
+- name: Setup netbox ip addresses
+  netbox.netbox.netbox_ip_address:
+    netbox_url: "{{ netbox_url }}"
+    netbox_token: "{{ netbox_token }}"
+    data:
+      address: "{{ item.ip_address }}"
+      description: "{{ item.description }}"
+    validate_certs: false
+    state: present
+  loop: "{{ setup_netbox_ipaddresses }}"

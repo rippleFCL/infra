@@ -1,0 +1,39 @@
+---
+- name: Setup vlan
+  ansibleguy.opnsense.interface_vlan:
+    interface: "{{ item.value }}"
+    description: "{{ item.key }} vlan"
+    vlan: "{{ configure_opnsense_network_spec['vlan'][item.key]['vlan_id'] }}"
+    reload: false
+  loop: "{{ configure_opnsense_vlans | dict2items }}"
+  when: configure_opnsense_vlans is defined
+  delegate_to: localhost
+  register: vlan_task
+
+- name: Reload vlan interfaces
+  ansibleguy.opnsense.reload:
+    target: "interface_vlan"
+  delegate_to: localhost
+  when: vlan_task.changed # noqa: no-handler
+
+- name: Setup vip
+  ansibleguy.opnsense.interface_vip:
+    interface: "{{ configure_opnsense_interfaces[item.interface]['identifier'] }}"
+    description: "{{ item.description | default(omit) }}"
+    vhid: "{{ item.vhid }}"
+    password: "{{ item.password }}"
+    mode: "{{ item.mode }}"
+    advertising_base: "{{ configure_opnsense_vip_info.advertising_base }}"
+    advertising_skew: "{{ configure_opnsense_vip_info.advertising_skew }}"
+    address: "{{ item.address }}"
+    reload: false
+  loop: "{{ configure_opnsense_vip }}"
+  when: configure_opnsense_vip is defined
+  delegate_to: localhost
+  register: vip_task
+
+- name: Reload vip interfaces
+  ansibleguy.opnsense.reload:
+    target: "interface_vip"
+  delegate_to: localhost
+  when: vip_task.changed # noqa: no-handler

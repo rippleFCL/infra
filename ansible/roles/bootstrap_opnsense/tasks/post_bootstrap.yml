@@ -1,0 +1,81 @@
+---
+- name: Install post bootstrap pkgs
+  community.general.pkgng:
+    name: "{{ bootstrap_opnsense_pkgs }}"
+    state: present
+
+- name: Install pip
+  ansible.builtin.command:
+    cmd: python3 -m ensurepip
+    creates: /usr/local/bin/pip3
+
+- name: Install lxml deps
+  community.general.pkgng:
+    name: "libxslt"
+    state: present
+
+- name: Install lxml
+  ansible.builtin.pip:
+    name: lxml
+
+- name: Add user api key and sshkey in default config
+  community.general.xml:
+    path: /usr/local/etc/config.xml
+    xpath: /opnsense/system/user[1]
+    add_children:
+      - authorizedkeys: "{{ bootstrap_opnsense_auth_ssh_key }}"
+      - apikeys:
+          _:
+            - item:
+                _:
+                  - key: "{{ bootstrap_opnsense_api_key }}"
+                  - secret: "{{ bootstrap_opnsense_api_secret }}"
+    pretty_print: true
+
+- name: Modify user password in default config
+  community.general.xml:
+    path: /usr/local/etc/config.xml
+    xpath: /opnsense/system/user[1]/password
+    value: "{{ bootstrap_opnsense_password }}"
+    pretty_print: true
+
+- name: Modify lan interface ip in default config
+  community.general.xml:
+    path: /usr/local/etc/config.xml
+    xpath: /opnsense/interfaces/lan/ipaddr
+    value: "{{ bootstrap_opnsense_network_info['ip'] }}"
+    pretty_print: true
+
+- name: Modify lan interface subnet in default config
+  community.general.xml:
+    path: /usr/local/etc/config.xml
+    xpath: /opnsense/interfaces/lan/subnet
+    value: "{{ bootstrap_opnsense_network_info['subnet'] }}"
+    pretty_print: true
+
+- name: Remove dhcpd lan server in default config
+  community.general.xml:
+    path: /usr/local/etc/config.xml
+    xpath: /opnsense/dhcpd/lan
+    state: absent
+    pretty_print: true
+
+- name: Add provisioned marker file
+  ansible.builtin.file:
+    path: /etc/converted
+    state: touch
+    mode: "0644"
+
+- name: Reboot machine
+  ansible.builtin.command:
+    cmd: reboot
+  failed_when: false
+  changed_when: true
+  async: 5
+  poll: 0
+  register: reboot
+
+- name: Cleanup async
+  ansible.builtin.async_status:
+    mode: cleanup
+    jid: reboot.ansible_job_id

@@ -1,0 +1,20 @@
+- name: Managing volumes
+  community.general.zfs:
+    name: "{{ zvol_data.path }}"
+    extra_zfs_properties:
+      compression: "{{ zvol_data.options.compression | default(omit) }}"
+      dedup: "{{ zvol_data.options.dedup | default(omit) }}"
+      encryption: "{{ zvol_data.options.encryption | default(omit) }}"
+      keyformat: "{{ zvol_data.options.keyformat | default(omit) }}"
+      keylocation: "{{ zvol_data.options.keylocation | default(omit) }}"
+      logbias: "{{ zvol_data.options.logbias | default(omit) }}"
+      primarycache: "{{ zvol_data.options.primarycache | default(omit) }}"
+      quota: "{{ zvol_data.options.quota | default(omit) }}"
+      refquota: "{{ zvol_data.options.refquota | default(omit) }}"
+      recordsize: "{{ zvol_data.options.recordsize | default(omit) }}"
+      sync: "{{ zvol_data.options.sync | default(omit) }}"
+      volsize: "{{ zvol_data.size }}"
+    state: present
+  loop: "{{ zfs_pool_zvols | zfs_zvol_preprocessor }}"
+  loop_control:
+    loop_var: zvol_data

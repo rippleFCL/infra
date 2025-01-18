@@ -1,0 +1,10 @@
+---
+- name: Tuning zfs performance
+  ansible.builtin.template:
+    src: etc/modprobe.d/zfs.conf.j2
+    dest: /etc/modprobe.d/zfs.conf
+    owner: root
+    group: root
+    mode: "0644"
+  when: setup_zfs_perf_tuning is defined
+  notify: Update Kernel

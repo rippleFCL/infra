@@ -1,0 +1,54 @@
+---
+- name: Configure vlans
+  community.network.icx_config:
+    lines:
+      - "{{ ('tagged ethe ' if switch_vlan.tagged_ports | default(False) else '') + (switch_vlan.tagged_ports | default([]) | join(' ethe ')) }}"
+      - "{{ ('untagged ethe ' if switch_vlan.untagged_ports | default(False) else '') + (switch_vlan.untagged_ports | default([]) | join(' ethe ')) }}"
+    parents: "vlan {{ configure_switch_netconfig['vlan'][switch_vlan.name]['vlan_id'] }} name {{ switch_vlan.name }} by port"
+    save_when: always
+    match: strict
+    diff_against: running
+  loop: "{{ configure_switch_vlans }}"
+  loop_control:
+    loop_var: switch_vlan
+
+- name: Configure native vlans
+  community.network.icx_config:
+    lines:
+      - "dual-mode {{ configure_switch_netconfig['vlan'][interfaces_nvlan.native_vlan]['vlan_id'] }}"
+    parents: "interface ethernet {{ interfaces_nvlan.interface }}"
+    save_when: always
+    match: strict
+    diff_against: running
+  loop: "{{ configure_switch_native_vlan | default([]) }}"
+  loop_control:
+    loop_var: interfaces_nvlan
+
+- name: Add vlans to netbox
+  netbox.netbox.netbox_vlan:
+    netbox_url: "{{ netbox_url }}"
+    netbox_token: "{{ netbox_token }}"
+    data:
+      name: "{{ switch_vlan.name }}"
+      vid: "{{ configure_switch_netconfig['vlan'][switch_vlan.name]['vlan_id'] }}"
+    state: present
+    validate_certs: false
+  when: update_netbox
+  loop: "{{ configure_switch_vlans }}"
+  loop_control:
+    loop_var: switch_vlan
+
+- name: Add prefixes to netbox
+  netbox.netbox.netbox_prefix:
+    netbox_url: "{{ netbox_url }}"
+    netbox_token: "{{ netbox_token }}"
+    data:
+      prefix: "{{ configure_switch_netconfig['vlan'][switch_vlan.name]['network'] }}"
+      description: "{{ switch_vlan.name }} vlan network"
+      vlan: "{{ switch_vlan.name }}"
+    state: present
+    validate_certs: false
+  when: update_netbox and configure_switch_netconfig['vlan'][switch_vlan.name]['network'] is defined
+  loop: "{{ configure_switch_vlans }}"
+  loop_control:
+    loop_var: switch_vlan
