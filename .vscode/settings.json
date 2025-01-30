@@ -1,0 +1,21 @@
+{
+    "ansible.python.interpreterPath": "/bin/python3",
+    "ansible.python.activationScript": ".venv/bin/activate",
+    "yaml.schemas": {
+        "https://raw.githubusercontent.com/ansible/ansible-lint/main/src/ansiblelint/schemas/ansible.json#/$defs/playbook": [
+            "file:///home/ripple/programming/infrastructure/ansible/playbooks/vms/deply-ssd-nas.yml",
+            "file:///home/ripple/programming/infrastructure/ansible/roles/setup_zfs/tasks/import_pool.yml"
+        ],
+        "https://raw.githubusercontent.com/ansible/ansible-lint/main/src/ansiblelint/schemas/vars.json": "file:///home/ripple/programming/infrastructure/ansible/environment/prod/host_vars/storage-ssd-nas.yml",
+        "https://raw.githubusercontent.com/ansible/ansible-lint/main/src/ansiblelint/schemas/ansible.json#/$defs/tasks": "file:///home/ripple/programming/infrastructure/ansible/roles/setup_nfs/tasks/deploy.yml"
+    },
+    "files.associations": {
+        "*.yml": "ansible",
+        "*.yaml": "ansible",
+        "*.j2": "ansible-jinja",
+        "*.hcl": "terraform",
+        "*.pkrvars.hcl": "terraform-vars",
+        "*.pkrtpl.hcl": "",
+        "*.yml.tftpl": "yaml"
+    },
+}
