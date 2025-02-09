@@ -28,6 +28,7 @@ httpx = "^0.28.1"
 pydantic = "^2.10.6"
 ansible-core = "^2.18.2"
 ansible-pydantic-formatting = {git = "https://github.com/rippleFCL/ansible_pydantic_formatting.git"}
+librouteros = "^3.4.1"
 
 [build-system]
 requires = ["poetry-core"]

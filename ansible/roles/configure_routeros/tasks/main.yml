@@ -1,18 +1,30 @@
 ---
+# - name: Gather RouterOS facts
+#   community.routeros.api_facts:
 
-- name: Gather RouterOS facts
-  community.routeros.api_facts:
+- name: Debug
+  ansible.builtin.debug:
+    msg: "{{ query('tikify', 'bridge_vlans') }}"
+  tags: debug
 
-- name: Include system
-  ansible.builtin.include_tasks:
-    file: system.yml
-    apply:
-      tags: system
-  tags: system
+- name: configure mikrotik
+  module_defaults:
+    community.routeros.api_modify:
+      hostname: "{{ ansible_host }}"
+      username: "{{ ansible_user }}"
+      password: "{{ ansible_password }}"
+  block:
 
-- name: Include interfaces
-  ansible.builtin.include_tasks:
-    file: interfaces.yml
-    apply:
-      tags: interfaces
-  tags: interfaces
+  - name: Include system
+    ansible.builtin.include_tasks:
+      file: system.yml
+      apply:
+        tags: system
+    tags: system
+
+  - name: Include interfaces
+    ansible.builtin.include_tasks:
+      file: interfaces.yml
+      apply:
+        tags: interfaces
+    tags: interfaces
