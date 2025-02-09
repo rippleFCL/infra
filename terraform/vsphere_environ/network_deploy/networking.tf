@@ -6,7 +6,7 @@ module "core-fw-cu" {
   vm_name               = "core-fw-cu-${format("%02d", count.index + 1)}-prod"
   vm_os                 = "freebsd"
   vm_template           = "freebsd-13-3-template"
-  vsphere_cluster       = "networking-cluster"
+  vsphere_cluster       = "storage-cluster"
 
   wait_for_ip = false
 
@@ -19,7 +19,7 @@ module "core-fw-cu" {
       network_id = data.vsphere_network.vm_mgmt_net.id
     },
     {
-      network_id = data.vsphere_network.networking_cu_routing_trunk.id
+      network_id = data.vsphere_network.storage_cu_routing_trunk.id
     }
   ]
   spec = {
@@ -37,7 +37,7 @@ module "gateway-fw-cu" {
   vm_name               = "gateway-fw-${format("%02d", count.index + 1)}-prod"
   vm_os                 = "freebsd"
   vm_template           = "freebsd-13-3-template"
-  vsphere_cluster       = "networking-cluster"
+  vsphere_cluster       = "storage-cluster"
 
   vm_folder = vsphere_folder.vm_folder.path
   vm_tags   = [vsphere_tag.gw-fw-cu.id, vsphere_tag.opnsense.id, ]
@@ -51,7 +51,7 @@ module "gateway-fw-cu" {
       network_id = data.vsphere_network.vm_mgmt_net.id
     },
     {
-      network_id = data.vsphere_network.networking_cu_routing_trunk.id
+      network_id = data.vsphere_network.storage_cu_routing_trunk.id
     }
   ]
   spec = {

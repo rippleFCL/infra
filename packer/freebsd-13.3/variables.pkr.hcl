@@ -76,3 +76,7 @@ variable "vm_name" {
 variable "template_folder" {
 	type    = string
 }
+
+variable "http_ip" {
+  type = string
+}

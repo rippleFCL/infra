@@ -1,6 +1,6 @@
 datacenter            = "ripple-labs"
-cluster               = "networking-cluster"
-datastore             = "ds-netcu2"
+cluster               = "storage-cluster"
+datastore             = "ds-esxi-storage2"
 network_name          = "vm mgmt net"
 iso_url               = "https://download.freebsd.org/releases/amd64/amd64/ISO-IMAGES/13.3/FreeBSD-13.3-RELEASE-amd64-dvd1.iso"
 iso_checksum          = "4064f704baadf204ab4f75dda987e717b8da252840675ee5feef8f5be7e9356c"

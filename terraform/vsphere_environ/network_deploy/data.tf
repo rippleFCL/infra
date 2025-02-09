@@ -7,7 +7,7 @@ data "vsphere_network" "vm_mgmt_net" {
   datacenter_id = data.vsphere_datacenter.dc.id
 }
 
-data "vsphere_network" "networking_cu_routing_trunk" {
-  name          = "networking_cu_routing_trunk"
+data "vsphere_network" "storage_cu_routing_trunk" {
+  name          = "storage_cu_routing_trunk"
   datacenter_id = data.vsphere_datacenter.dc.id
 }
