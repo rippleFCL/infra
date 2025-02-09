@@ -1,5 +1,0 @@
----
-
-port_type_enum:
-  trunk: admit-only-vlan-tagged
-  hybrid: admit-only-untagged-and-priority-tagged

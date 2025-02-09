@@ -40,7 +40,7 @@ source "vsphere-iso" "freebsd_13" {
   ssh_password = var.guest_password
 
   http_content = local.preseed_config
-
+  http_ip = var.http_ip
   CPUs         = var.vm_cpu_num
   RAM          = var.vm_mem_size
   RAM_reserve_all = true
@@ -67,7 +67,7 @@ source "vsphere-iso" "freebsd_13" {
     "dhclient -l /tmp/dhclient.lease.vmx0 vmx0<enter><wait5>",
     "fetch -o /tmp/installerconfig http://{{ .HTTPIP }}:{{ .HTTPPort }}/installerconfig<enter><wait5>",
     "bsdinstall script /tmp/installerconfig<enter>",
-    "<wait20><wait20><wait20>",
+    "<wait20><wait20><wait20><wait20><wait20><wait20>",
     "root<enter><wait>",
     var.guest_password,
     "<enter><wait>",

@@ -2,46 +2,47 @@ update_netbox: true
 
 network_spec:
   vlan:
+    default:
+      vlan_id: 1
     # routable nets
     mgmt:
-      vlan_id: "10"
+      vlan_id: 10
       network: 10.0.1.0/24
     network_mgmt:
-      vlan_id: "20"
+      vlan_id: 20
       network: 10.0.2.0/24
     lan:
-      vlan_id: "30"
+      vlan_id: 30
       network: 10.0.3.0/24
     dmz:
-      vlan_id: "40"
+      vlan_id: 40
       network: 10.0.4.0/24
     wlan:
-      vlan_id: "50"
+      vlan_id: 50
       network: 10.0.5.0/24
     guest_wlan:
-      vlan_id: "60"
+      vlan_id: 60
       network: 10.0.6.0/24
     vm_network:
-      vlan_id: "70"
+      vlan_id: 70
       network: 10.0.7.0/24
 
     # private nets
     esxi_storage:
-      vlan_id: "200"
+      vlan_id: 200
       network: 10.2.1.0/24
     esxi_migration:
-      vlan_id: "210"
+      vlan_id: 210
       network: 10.2.2.0/24
     vm_storage:
-      vlan_id: "220"
+      vlan_id: 220
       network: 10.2.3.0/24
 
     # transits
     ir_transit:
-      vlan_id: "400"
+      vlan_id: 400
       network: 10.1.2.0/24
-    wan_transit:
-      vlan_id: "410"
+
     fw_cluster_pfsync:
-      vlan_id: "420"
+      vlan_id: 420
       network: 10.1.4.0/24

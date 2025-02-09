@@ -1,73 +1,88 @@
-configure_switch_vlans:
-  - name: mgmt
-    tagged_ports:
-      - 1/3/1 to 1/3/8
-      - 2/3/1 to 2/3/7
-    untagged_ports:
-      - 1/1/1 to 1/1/14
-      - 1/1/21 to 1/1/24
-      - 2/1/1 to 2/1/7
-      - 2/1/9 to 2/1/13
-      - 2/1/21 to 2/1/24
-  - name: lan
-    tagged_ports:
-      - 1/3/6 to 1/3/8
-      - 2/3/6 to 2/3/7
-  - name: dmz
-    tagged_ports:
-      - 1/3/6 to 1/3/7
-      - 2/3/6 to 2/3/7
-  - name: wlan
-    tagged_ports:
-      - 1/3/6 to 1/3/8
-      - 2/3/6 to 2/3/7
-    untagged_ports:
-      - 2/1/8
-      - 1/1/19
-  - name: guest_wlan
-    tagged_ports:
-      - 1/3/6 to 1/3/8
-      - 2/3/6 to 2/3/7
-  - name: vm_network
-    tagged_ports:
-      - 1/3/1 to 1/3/8
-      - 2/3/1 to 2/3/7
-  - name: esxi_storage
-    tagged_ports:
-      - 1/3/1 to 1/3/7
-      - 2/3/1 to 2/3/7
-  - name: esxi_migration
-    tagged_ports:
-      - 1/3/1 to 1/3/7
-      - 2/3/1 to 2/3/7
-  - name: vm_storage
-    tagged_ports:
-      - 1/3/1 to 1/3/7
-      - 2/3/1 to 2/3/7
-  - name: ir_transit
-    tagged_ports:
-      - 1/3/6 to 1/3/7
-      - 2/3/6 to 2/3/7
-  - name: wan_transit
-    tagged_ports:
-      - 1/3/6 to 1/3/7
-      - 2/3/6 to 2/3/7
-    untagged_ports:
-      - 1/1/20
-      - 2/1/19
-  - name: fw_cluster_pfsync
-    tagged_ports:
-      - 1/3/6 to 1/3/7
-      - 2/3/6 to 2/3/7
+configure_switch_interfaces:
+  mgmt_port:
+    interface: ether1
+    comment: MGMT_uplink
 
-configure_switch_netconfig: "{{ network_spec }}"
+  esxi_storage2_uplink:
+    interface: sfp-sfpplus1
+    comment: esxi_storage2
 
-ansible_network_os: community.network.icx
+  esxi_storage1_uplink:
+    interface: sfp-sfpplus2
+    comment: esxi_storage2
+
+  windows_uplink:
+    interface: sfp-sfpplus3
+    comment: windows_desktop
+
+  jankvisor_uplink:
+    interface: sfp-sfpplus4
+    comment: jankvisor_desktop
+
+
+
+configure_switch_bridges:
+  main_bridge:
+    interface: bridgeLocal
+    vlan_filtering: true
+    admin_mac: 74:4D:28:E3:3E:B9
+    ports:
+      - interface: mgmt_port
+        untagged: mgmt
+      - interface: esxi_storage2_uplink
+        tagged:
+          - mgmt
+          - network_mgmt
+          - lan
+          - dmz
+          - wlan
+          - guest_wlan
+          - vm_network
+          - esxi_storage
+          - esxi_migration
+          - vm_storage
+          - ir_transit
+          - fw_cluster_pfsync
+      - interface: esxi_storage1_uplink
+        tagged:
+          - mgmt
+          - network_mgmt
+          - lan
+          - dmz
+          - wlan
+          - guest_wlan
+          - vm_network
+          - esxi_storage
+          - esxi_migration
+          - vm_storage
+          - ir_transit
+          - fw_cluster_pfsync
+
+      - interface: windows_uplink
+        untagged: lan
+      - interface: jankvisor_uplink
+        tagged:
+          - lan
+          - mgmt
+          - network_mgmt
+
+configure_switch_vlan_interfaces:
+  mgmt_interface:
+    bridge: main_bridge
+    vlan: network_mgmt
+    address: 10.0.2.5/24
+
+
+configure_switch_type: mikrotik
+
 ansible_connection: ansible.netcommon.network_cli
+ansible_network_cli_ssh_type: libssh
+ansible_network_os: community.routeros.routeros
+
 ansible_become: true
 ansible_become_method: enable
-ansible_host: 10.0.1.6
+ansible_host: 10.0.2.5
 
-ansible_user: root
+ansible_user: admin
 ansible_password: "{{ lookup('bws_cache', 'ripple_user_password').value }}"
 
