@@ -7,32 +7,45 @@
 - name: Run post clone
   when: not st.stat.exists
   block:
-  - name: Download opnsense bootstrap script
-    ansible.builtin.get_url:
-      url: https://raw.githubusercontent.com/opnsense/update/master/src/bootstrap/opnsense-bootstrap.sh.in
-      dest: /root/opnsense-bootstrap.sh.in
-      mode: '0700'
+    - name: Download opnsense bootstrap script
+      ansible.builtin.get_url:
+        url: https://raw.githubusercontent.com/opnsense/update/master/src/bootstrap/opnsense-bootstrap.sh.in
+        dest: /root/opnsense-bootstrap.sh.in
+        mode: '0700'
 
-  - name: Stop script from rebooting
-    ansible.builtin.lineinfile:
-      path: /root/opnsense-bootstrap.sh.in
-      regexp: '^\s*reboot'
-      state: absent
+    - name: Stop script from rebooting
+      ansible.builtin.lineinfile:
+        path: /root/opnsense-bootstrap.sh.in
+        regexp: '^\s*reboot'
+        state: absent
 
-  - name: Apply hotfix to script
-    ansible.builtin.lineinfile:
-      path: /root/opnsense-bootstrap.sh.in
-      regexp: '^set -e'
-      state: absent
+    - name: Apply hotfix to script
+      ansible.builtin.lineinfile:
+        path: /root/opnsense-bootstrap.sh.in
+        regexp: '^set -e'
+        state: absent
 
-  - name: Run bootstrap script
-    ansible.builtin.command:
-      cmd: /root/opnsense-bootstrap.sh.in -r 24.1 -y
-    failed_when: false
-    changed_when: true
+    - name: Run bootstrap script
+      ansible.builtin.command:
+        cmd: /root/opnsense-bootstrap.sh.in -r 24.1 -y
+      failed_when: false
+      changed_when: true
+    - name: Add provisioned marker file
+      ansible.builtin.file:
+        path: /etc/converted
+        state: touch
+        mode: "0644"
 
-  - name: Post bootstrap tasks
-    ansible.builtin.include_tasks:
-      file: post_bootstrap.yml
-    vars:
-      ansible_python_interpreter: /usr/local/bin/python3
+- name: Check if opnsense convert happened
+  ansible.builtin.stat:
+    path: /etc/convertedpb
+  register: st
+
+- name: Run post clone
+  when: not st.stat.exists
+  block:
+    - name: Post bootstrap tasks
+      ansible.builtin.include_tasks:
+        file: post_bootstrap.yml
+      vars:
+        ansible_python_interpreter: /usr/local/bin/python3

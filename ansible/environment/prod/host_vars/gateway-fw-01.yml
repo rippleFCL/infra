@@ -1,24 +1,21 @@
 opnsense_api_key: "{{ lookup('bws_cache', 'opns_gwfw_api_key').value }}"
 opnsense_api_secret: "{{ lookup('bws_cache', 'opns_gwfw_api_secret').value }}"
 opnsense_api_access_secret: "{{ lookup('bws_cache', 'opns_gwfw_api_access_secret').value }}"
-ansible_host: 10.1.2.1
-# bootstrap_opnsense_network_info:
-#   ip: 10.0.1.1
-#   subnet: 24
-#   name: mgmt
 
-configure_opnsense_pppoe_interfaces:
-  - identifier: ppp
-    config:
-      ptpid: "0"
-      type: "pppoe"
-      if: "pppoe0"
-      ports: "vlan0.{{ network_spec['vlan']['wan_transit']['vlan_id'] }}"
-      username: "bthomehub@btbroadband.com"
-      password: "QlQ="
-      descr: "bt wan pppoe"
+bootstrap_opnsense_network_info:
+  ip: 10.0.2.3
+  subnet: 24
+  name: mgmt
+
 
 configure_opnsense_interfaces:
+  mgmt:
+    identifier: lan
+    vlan: network_mgmt
+    config:
+      if: vmx0
+      ipaddr: "10.0.2.3"
+
   ir_transit:
     identifier: opt1
     vlan: ir_transit
@@ -26,9 +23,9 @@ configure_opnsense_interfaces:
   bt_wan:
     identifier: opt2
     config:
-      ipaddr: pppoe
-      if: pppoe0
-      blockpriv: "1"
+      ipaddr: "192.168.1.10"
+      subnet: "24"
+      if: vmx1
       blockbogons: "1"
 
   Loopback:
@@ -45,8 +42,7 @@ configure_opnsense_interfaces:
 
 
 configure_opnsense_vlans:
-  wan_transit: vmx1
-  ir_transit: vmx1
+  ir_transit: vmx2
 
 configure_opnsense_interfaces_overrides:
   ir_transit:
@@ -54,6 +50,11 @@ configure_opnsense_interfaces_overrides:
 
 configure_opnsense_snat:
   - description: lan snat
+    target: bt_wan
+    interface: bt_wan
+    source_net: "{{ network_spec['vlan']['lan']['network'] }}"
+
+  - description: mgmt snat
     target: bt_wan
     interface: bt_wan
     source_net: "{{ network_spec['vlan']['lan']['network'] }}"
@@ -77,6 +78,11 @@ configure_opnsense_snat:
     target: bt_wan
     interface: bt_wan
     source_net: "{{ network_spec['vlan']['mgmt']['network'] }}"
+
+  - description: ir_transit snat
+    target: bt_wan
+    interface: bt_wan
+    source_net: "{{ network_spec['vlan']['ir_transit']['network'] }}"
 
 configure_opnsense_fw_aliases:
   - name: private_ips
@@ -103,6 +109,7 @@ configure_opnsense_rule_blocks:
     - description: "block all"
       action: "block"
       quick: false
+      log: true
 
 configure_opnsense_rules:
   - interface: ir_transit
@@ -117,6 +124,21 @@ configure_opnsense_rules:
 
     local_rule_blocks:
       block_private_out:
+        - description: "allow double nat outer network"
+          direction: out
+          action: "pass"
+          source:
+            alias: private_ips
+          destination:
+            network: 192.168.1.0/24
+        - description: "allow double nat network"
+          direction: out
+          action: "pass"
+          source:
+            network: 192.168.1.0/24
+          destination:
+            alias: private_ips
+            invert: true
         - description: "block private ips"
           log: true
           direction: "out"
@@ -132,20 +154,27 @@ configure_opnsense_packages:
   - os-ddclient
   - os-theme-cicada
 
-configure_opnsense_dns_forwarding:
-  - server: "10.1.2.2"
-    domain: ripplefcl.com
-
-  - server: "10.1.2.2"
-    domain: ""
+# configure_opnsense_dns_forwarding:
+#   - server: "10.1.2.2"
+#     domain: ripplefcl.com
+#
+#   - server: "10.1.2.2"
+#     domain: ""
 
 configure_opnsense_gateways:
   - name: fw_cu
     interface: ir_transit
     gateway: 10.1.2.2
     priority: 255
+  - name: wan
+    interface: bt_wan
+    gateway: 192.168.1.254
+    priority: 255
 
 configure_opnsense_routes:
+  - gateway: wan
+    network: 0.0.0.0/0
+    description: wan
   - gateway: fw_cu
     network: "{{ network_spec['vlan']['lan']['network'] }}"
     description: lan route

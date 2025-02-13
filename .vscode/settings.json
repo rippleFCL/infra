@@ -1,5 +1,5 @@
 {
-    "ansible.python.interpreterPath": "/bin/python3",
+    "ansible.python.interpreterPath": "/home/ripple/.cache/pypoetry/virtualenvs/infrastructure-Hca9NF0D-py3.13/bin/python",
     "ansible.python.activationScript": ".venv/bin/activate",
     "yaml.schemas": {
         "https://raw.githubusercontent.com/ansible/ansible-lint/main/src/ansiblelint/schemas/ansible.json#/$defs/playbook": [

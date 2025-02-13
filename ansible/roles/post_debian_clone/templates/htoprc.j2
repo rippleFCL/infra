@@ -1,0 +1,15 @@
+fields=0 48 17 18 38 39 40 2 46 47 49 1
+header_margin=1
+
+highlight_base_name=1
+show_cpu_usage=1
+
+left_meters=AllCPUs Memory Swap
+left_meter_modes=1 1 1
+
+right_meters=Tasks LoadAverage Uptime DiskIO NetworkIO CPU
+right_meter_modes=2 2 2 2 2 1
+
+{% if ansible_virtualization_role == 'host' %}
+show_cpu_temperature=1
+{% endif %}

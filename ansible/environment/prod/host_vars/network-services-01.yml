@@ -1,13 +1,18 @@
 nmcli_interfaces:
   - name: ens192
     method: manual
-    gateway: "10.0.6.1"
-    dns: "10.0.6.1"
-    ip: 10.0.6.10/24
+    gateway: "10.0.7.1"
+    dns: "10.0.7.1"
+    ip: 10.0.7.10/24
 
-deploy_docker_services:
-  - net_stack
-  - technisync
 
 deploy_docker_roles:
+  - gravity
   - unifi_controller
+
+gravity_options:
+  INSTANCE_IDENTIFIER: gravity-01
+  # ADMIN_PASSWORD:
+  # SENTRY_ENABLED:
+  INSTANCE_IP: "10.0.7.10" # Host variable for static IP
+  INTERFACE_LISTEN: '0.0.0.0'

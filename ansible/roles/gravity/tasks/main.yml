@@ -1,0 +1,65 @@
+---
+- name: Deploy Gravity primary node
+  community.docker.docker_container:
+    name: gravity
+    image: ghcr.io/beryju/gravity:{{ gravity_version }}
+    hostname: "{{ gravity_options.INSTANCE_IDENTIFIER }}"
+    restart_policy: unless-stopped
+    network_mode: host
+    volumes:
+      - /mnt/docking_data/gravity:/data
+    env: "{{ gravity_options }}"
+    log_driver: json-file
+    log_options:
+      max-size: "10m"
+      max-file: "3"
+    pull: true
+  when: gravity_primary_host == ansible_host
+  notify: Prune Docker images
+
+- name: Wait until Gravity primary node web UI is reachable
+  ansible.builtin.wait_for:
+    host: "{{ gravity_primary_host }}"
+    port: 8008
+    delay: 5
+    timeout: 90
+  when: gravity_primary_host != ansible_host and (gravity_etcd_join_cluster_string | default("") | length > 0)
+  check_mode: false
+
+- name: Wait until Gravity primary node responds to DNS queries
+  community.dns.nameserver_info:
+    name: google.co.uk
+    query_timeout: 5
+    query_retry: 6
+    server: "{{ ansible_default_ipv4.address }}"
+  when: gravity_primary_host == ansible_host
+  delegate_to: localhost
+  # Explicitly disable become to avoid localhost privilege escalation
+  become: false
+  check_mode: false
+  vars:
+    # Set Python interpreter path to avoid picking up the system default which will likely not
+    # have the dnspython module (a dependency of nameserver_info) as this project uses a venv.
+    ansible_python_interpreter: "{{ ansible_playbook_python }}"
+
+- name: Deploy Gravity secondary node(s)
+  community.docker.docker_container:
+    name: gravity
+    image: ghcr.io/beryju/gravity:{{ gravity_version }}
+    hostname: "{{ gravity_options.INSTANCE_IDENTIFIER }}"
+    restart_policy: unless-stopped
+    network_mode: host
+    volumes:
+      - /mnt/docking_data/gravity:/data
+    env: >-
+      {{ gravity_options | combine({
+        'ETCD_JOIN_CLUSTER': gravity_etcd_join_cluster_string ~ ',http://' ~ gravity_primary_host ~ ':8008'
+      }) }}
+    log_driver: json-file
+    log_options:
+      max-size: "10m"
+      max-file: "3"
+    pull: true
+  when: gravity_primary_host != ansible_host and (gravity_etcd_join_cluster_string | default("") | length > 0)
+  notify: Prune Docker images
+  throttle: 1

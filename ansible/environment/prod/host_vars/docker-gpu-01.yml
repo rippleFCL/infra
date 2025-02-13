@@ -8,12 +8,15 @@ mount_nfs_shares:
     share: 10.2.3.1:/hdd-pool/hdd-nas/plex_media/nfs
     opts: rw,async,hard,nofail,_netdev
   - path: /mnt/download_pool
-    share: 10.2.3.2:/ssd-pool/ssd-nas/download/nfs/
+    share: 10.2.3.2:/big-ssd-pool/ssd-nas/download/
     opts: rw,async,hard,nofail,_netdev
 
 nmcli_interfaces:
   - name: ens192
-    method: auto
+    method: manual
+    gateway: "10.0.7.1"
+    dns: "10.0.7.1"
+    ip: 10.0.7.20/24
 
   - name: ens256
     method: manual
@@ -26,3 +29,9 @@ deploy_docker_services:
 install_container_toolkit: true
 nvidia_drivers_install: true
 nvidia_cuda_pkg_version: "12.5.1-1"
+
+docker_overieds:
+  plonk:
+    services:
+      environment:
+        bla:bla

@@ -5,6 +5,10 @@ collections:
   - name: community.vmware
   - name: ansible.netcommon
   - name: community.routeros
+  - name: community.general
+  - name: ansible.posix
+  - name: community.docker
+  - name: community.dns
 roles:
   - name: mrlesmithjr.zfs
   - name: geerlingguy.docker

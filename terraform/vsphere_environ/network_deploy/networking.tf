@@ -13,19 +13,26 @@ module "core-fw-cu" {
   vm_folder = vsphere_folder.vm_folder.path
   vm_tags   = [vsphere_tag.int-fw-cu.id, vsphere_tag.opnsense.id, ]
 
-  vm_datastore = "ssd-datastore"
+  vm_datastore = "big-ssd-datastore"
   network_spec = [
     {
-      network_id = data.vsphere_network.vm_mgmt_net.id
+      network_id = data.vsphere_network.vm_net_mgmt.id
     },
     {
       network_id = data.vsphere_network.storage_cu_routing_trunk.id
+    },
+    {
+      network_id = data.vsphere_network.wifi.id
+    },
+    {
+      network_id = data.vsphere_network.guest_wifi.id
     }
   ]
   spec = {
     cpu       = 4
     memory    = 2000
     disk_size = 16
+    linked_clone = true
   }
 }
 
@@ -45,10 +52,13 @@ module "gateway-fw-cu" {
   wait_for_ip = false
 
 
-  vm_datastore = "ssd-datastore"
+  vm_datastore = "big-ssd-datastore"
   network_spec = [
     {
-      network_id = data.vsphere_network.vm_mgmt_net.id
+      network_id = data.vsphere_network.vm_net_mgmt.id
+    },
+    {
+      network_id = data.vsphere_network.wan_conn.id
     },
     {
       network_id = data.vsphere_network.storage_cu_routing_trunk.id
@@ -58,5 +68,6 @@ module "gateway-fw-cu" {
     cpu       = 4
     memory    = 2000
     disk_size = 16
+    linked_clone = true
   }
 }

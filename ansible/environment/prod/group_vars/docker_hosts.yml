@@ -8,59 +8,20 @@ disk_map:
 app_base_dir: /mnt/docking_data/
 
 deploy_docker_service_definitions:
-  technisync:
-    services:
-      technisync:
-        image: ghcr.io/monstermuffin/technisync:latest
-        container_name: technisync
-        restart: unless-stopped
-        volumes:
-          - /mnt/docking_data/technisync/config:/data
-        environment:
-          SYNC_INTERVAL: 600
-          DB_PATH: /data/dns_sync.db
-          LOG_LEVEL: INFO
-          SYNC_REVERSE_ZONES: true
-          ZONES_TO_SYNC: ripplefcl.com
-          SERVER1_URL: http://technitium-01.int.ripplefcl.com:5380
-          SERVER1_API_KEY: "{{ lookup('bws_cache', 'technitium-01-api-token').value }}"
-          SERVER2_URL: http://technitium-02.int.ripplefcl.com:5380
-          SERVER2_API_KEY: "{{ lookup('bws_cache', 'technitium-02-api-token').value }}"
-
-  net_stack:
-    services:
-      technitium:
-        container_name: technitium
-        hostname: technitium
-        image: technitium/dns-server:latest
-        network_mode: "host"
-        environment:
-          DNS_SERVER_DOMAIN: dns-server
-        volumes:
-          - /mnt/docking_data/dns_stack/config:/etc/dns
-        restart: unless-stopped
-
   plex_stack:
     services:
       plex:
-        image: plexinc/pms-docker:1.41.1.9057-af5eaea7a
+        image:  lscr.io/linuxserver/plex:1.41.3
         container_name: plex
         network_mode: host
-        privileged: true
-        deploy:
-          resources:
-            reservations:
-              devices:
-                - driver: nvidia
-                  count: 1
-                  capabilities: [gpu]
+        runtime: nvidia
         environment:
-          PLEX_UID: "1100"
-          PLEX_GID: "1100"
+          PUID: "1100"
+          PGID: "1100"
           TZ: "Europe/London"
           PLEX_CLAIM: "{{ lookup('bws_cache', 'plex_claim').value }}"
-          NVIDIA_DRIVER_CAPABILITIES: all
           NVIDIA_VISIBLE_DEVICES: all
+          VERSION: docker
         volumes:
           - /mnt/docking_data/plex/config:/config
           - /mnt/plex_media/media/tv:/tv

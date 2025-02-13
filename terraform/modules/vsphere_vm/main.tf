@@ -41,6 +41,7 @@ resource "vsphere_virtual_machine" "vm" {
   dynamic "disk" {
     for_each = var.spec.additional_disks != null ? var.spec.additional_disks : []
     content {
+
       label            = "extra-disk-${disk.key}"
       datastore_id     = disk.value.datastore_id != null ? disk.value.datastore_id : null
       attach           = disk.value.attach_disk
@@ -69,6 +70,7 @@ resource "vsphere_virtual_machine" "vm" {
   }
 
 }
+
 resource "vsphere_drs_vm_override" "drs_vm_override" {
   count              = var.is_ha == false ? 1 : 0
   compute_cluster_id = data.vsphere_compute_cluster.cluster.id

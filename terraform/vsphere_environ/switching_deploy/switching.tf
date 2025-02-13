@@ -23,16 +23,20 @@ module "storage_cu_dvswitch" {
     },
     {
       name = "storage_cu_vm_vlan"
-      vlan = 60
+      vlan = 70
     },
     {
       name = "storage_cu_vm_mgmt"
       vlan = 10
     },
     {
+      name = "storage_cu_vm_net_mgmt"
+      vlan = 20
+    },
+    {
       name = "storage_cu_routing_trunk"
       vlan_range = [{
-        min_vlan = 20,
+        min_vlan = 10,
         max_vlan = 4094
       }]
     },

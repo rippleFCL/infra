@@ -1,0 +1,57 @@
+- name: Ensure deb deps
+  ansible.builtin.apt:
+    name:
+      - python3-pip
+      - python3-yaml
+    state: present
+
+- name: Ensure appdata path exists
+  ansible.builtin.file:
+    path: "{{ item }}"
+    owner: "1000"
+    group: "1000"
+    mode: '0775'
+    state: directory
+  loop:
+    - "/docking_data/nginx"
+    - "/docking_data/nginx/conf"
+    - "/docking_data/nginx/html"
+
+
+
+- name: Copy nginx config
+  ansible.builtin.copy:
+    src: nginx.conf
+    dest: "/docking_data/nginx/conf/nginx-config.conf"
+    owner: "1000"
+    group: "1000"
+    mode: '0755'
+
+- name: Copy nginx html
+  ansible.builtin.copy:
+    src: index.html
+    dest: "/docking_data/nginx/html/index.html"
+    owner: "1000"
+    group: "1000"
+    mode: '0755'
+
+- name: Create docker stack
+  community.docker.docker_compose_v2:
+    project_name: "nginx-ping"
+    definition:
+      services:
+        nginx:
+          image: nginx
+          container_name: nginx
+          restart: unless-stopped
+          ports:
+            - 80:80
+          volumes:
+            - /docking_data/nginx/html/:/usr/share/nginx/html/
+            - /docking_data/nginx/conf/:/etc/nginx/conf.d/
+            # - ./logs/:/var/log/nginx
+          develop:
+            watch:
+              - action: sync+restart
+                path: ./conf.d/
+                target: /etc/nginx/conf.d/

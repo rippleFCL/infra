@@ -8,7 +8,7 @@ with_tags: true
 hostnames:
   - 'config.name.replace("-prod", "")'
 compose:
-  ansible_host: "guest.net | vmware_ip_filter('10.0.1.0/24', '10.0.2.0/24', '10.0.6.0/24')"
+  ansible_host: "guest.net | vmware_ip_filter('10.0.2.0/24', '10.0.1.0/24', '10.0.7.0/24', '192.168.1.0/24')"
   subdomain_name: '({True:"int.", False:""}["internal-services" in tags] or {True:"ext.", False:""}["external-services" in tags])+"prod"'
   hostname: 'config.name.replace("-prod", "")'
 properties:

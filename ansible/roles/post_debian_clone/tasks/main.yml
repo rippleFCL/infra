@@ -1,3 +1,20 @@
+- name: Create htop config directory
+  ansible.builtin.file:
+    path: /home/ripple/.config/htop
+    mode: '0700'
+    owner: "ripple"
+    group: "ripple"
+    state: directory
+  register: htop_config_dir
+
+- name: Template htoprc
+  ansible.builtin.template:
+    src: htoprc.j2
+    dest: "{{ htop_config_dir.path }}/htoprc"
+    mode: '0644'
+    owner: "ripple"
+    group: "ripple"
+
 - name: Check if provision happened
   ansible.builtin.stat:
     path: /etc/provisioned

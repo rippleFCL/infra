@@ -62,7 +62,7 @@
 
 - name: Add provisioned marker file
   ansible.builtin.file:
-    path: /etc/converted
+    path: /etc/convertedpb
     state: touch
     mode: "0644"
 

@@ -48,7 +48,6 @@
     file: apply_fw_rules.yml
   when: configure_opnsense_rules is defined
 
-
 - name: Apply dns forwarding
   ansible.builtin.include_tasks:
     file: setup_dns_forwarding.yml
