@@ -1,0 +1,16 @@
+internal_domain: int.ripplefcl.com
+
+port_mapping:
+  vm_mgmt_net: vmx1
+  routing_trunk: vmx2
+  wifi: vmx3
+  guest_wifi: vmx0
+
+configure_opnsense_general_settings:
+  dnsserver: "10.0.7.10"
+  dnsserver: "10.0.7.11"
+  timezone: Europe/London
+
+configure_opnsense_packages:
+  - os-ddclient
+  - os-theme-cicada

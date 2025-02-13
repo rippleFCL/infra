@@ -1,0 +1,20 @@
+configure_opnsense_gateways:
+  - name: internet
+    interface: ir_transit
+    gateway: 10.1.2.1
+    monitor: 1.1.1.1
+    default: true
+
+  - name: jens_link
+    interface: jens_link
+    gateway: 10.0.21.1
+    monitor: 10.0.21.1
+
+
+configure_opnsense_routes:
+  - gateway: jens_link
+    network: "10.120.0.0/16"
+    description: jens link
+  - gateway: jens_link
+    network: "10.64.0.0/10"
+    description: jens link ts
