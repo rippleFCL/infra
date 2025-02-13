@@ -13,4 +13,4 @@
       - pfsyncinterface: "{{ configure_opnsense_interfaces[configure_opnsense_haconfig.interface]['identifier'] }}"
       - pfsyncpeerip: "{{ configure_opnsense_haconfig.ip }}"
     pretty_print: true
-  notify: Reload opnsense
+  notify: Reboot opnsense router

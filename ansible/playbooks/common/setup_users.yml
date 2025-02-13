@@ -1,0 +1,6 @@
+---
+- name: 'Bootstrap vm'
+  hosts: debian
+  become: true
+  roles:
+    - setup_users

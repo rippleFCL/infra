@@ -1,3 +1,6 @@
+from uuid import uuid5, UUID
+
+
 class FilterModule:
     """Gens da args"""
 
@@ -5,24 +8,26 @@ class FilterModule:
         return {"dhcprelay2xml": self.dhcprelay_to_xml}
 
     def dhcprelay_to_xml(self, dhcp_relay_config, interface_config):
+        namespace = UUID("3f348a97-6f37-47e9-a37e-080353092a07")
         relay_destinatons, relays = dhcp_relay_config["destinations"], dhcp_relay_config["relays"]
         xml_data = []
         destination_mapping = {}
         for destination in relay_destinatons:
-            destination_mapping[destination["name"]] = destination["uuid"]
+            destination_uuid = str(uuid5(namespace, f"{destination['server']}:{destination['name']}"))
+            destination_mapping[destination["name"]] = destination_uuid
             xml_child = {
                 "destinations": {
-                    "uuid": destination["uuid"],
-                    "_": [{key: value} for key, value in destination.items() if key != "uuid"],
+                    "uuid": destination_uuid,
+                    "_": [{key: value} for key, value in destination.items()],
                 }
             }
             xml_data.append(xml_child)
         for relay in relays:
             xml_child = {
                 "relays": {
-                    "uuid": relay["uuid"],
+                    "uuid": str(uuid5(namespace, f"{relay['interface']}:{relay['destination']}")),
                     "_": [
-                        {key: str(value)} for key, value in relay.items() if key not in ["uuid", "destination", "interface"]
+                        {key: str(value)} for key, value in relay.items() if key not in ["destination", "interface"]
                     ],
                 }
             }

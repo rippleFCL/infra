@@ -5,7 +5,7 @@
     value: "{{ configure_opnsense_theme }}"
     pretty_print: true
   when: configure_opnsense_theme is defined
-  notify: Reload opnsense
+  notify: Reboot opnsense router
 
 
 - name: Set general settings
@@ -16,4 +16,4 @@
     pretty_print: true
   when: configure_opnsense_general_settings is defined or configure_opnsense_hostinfo is defined
   loop: "{{  configure_opnsense_general_settings | default(dict()) | combine(configure_opnsense_hostinfo | default(dict())) | dict2items }}"
-  notify: Reload opnsense
+  notify: Reboot opnsense router

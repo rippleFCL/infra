@@ -2,7 +2,7 @@
 - name: 'Make users'
   ansible.builtin.user:
     name: "{{ item.username }}"
-    password: "{{ item.password }}"
+    password: "{{ item.password | default(omit) }}"
     uid: "{{ item.uid | default(omit) }}"
     shell: /bin/bash
     create_home: true

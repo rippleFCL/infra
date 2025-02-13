@@ -1,6 +1,9 @@
 nmcli_interfaces:
   - name: ens192
-    method: auto
+    method: manual
+    gateway: "10.0.7.1"
+    dns: "10.0.7.1"
+    ip: 10.0.7.21/24
 
   - name: ens256
     method: manual
@@ -11,3 +14,6 @@ deploy_docker_roles:
 
 deploy_docker_services:
   - taskin
+
+deploy_docker_roles:
+  - nginx_ping

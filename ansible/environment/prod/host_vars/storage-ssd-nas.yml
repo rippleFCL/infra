@@ -36,8 +36,46 @@ zfs_pool_config:
         devices:
           - ata-CT1000BX500SSD1_2250E69330F9
           - ata-CT1000BX500SSD1_2250E69330FD
-
+  - name: "big-ssd-pool"
+    options:
+      compression: lz4
+    vdevs:
+      - type: mirror
+        devices:
+          - ata-SAMSUNG_MZ7LM960HMJP-000AZ_S361NB0J502769
+          - ata-SAMSUNG_MZ7LM960HMJP-000AZ_S361NB0J507896
+      - type: mirror
+        devices:
+          - ata-SAMSUNG_MZ7LM960HMJP-000AZ_S361NB0J507905
+          - ata-SAMSUNG_MZ7LM960HMJP-000AZ_S361NX0J551581
 zfs_fs_config:
+  - pool: "big-ssd-pool/ssd-nas"
+    options:
+      compression: lz4
+    mountpoint:
+      owner: ripple
+      group: ripple
+      recurse: true
+    datasets:
+      - name: "vcenter"
+        options:
+          sync: always
+        mountpoint:
+          owner: root
+          group: root
+          recurse: true
+      - name: "veeam"
+        options:
+          sync: always
+        mountpoint:
+          owner: root
+          group: root
+          recurse: true
+      - name: "download"
+        mountpoint:
+          owner: plex
+          group: plex
+          recurse: true
   - pool: "ssd-pool/ssd-nas"
     options:
       compression: lz4
@@ -92,10 +130,14 @@ zfs_pools_scrub_cron:
     month: "*"
     weekday: sun
 
+
 nfs_exports:
   - "/ssd-pool/ssd-nas/vcenter/nfs/ *(rw,sync,no_root_squash)"
   - "/ssd-pool/ssd-nas/veeam/nfs/ *(rw,sync,no_root_squash)"
   - "/ssd-pool/ssd-nas/download/nfs/ *(rw)"
+  - "/big-ssd-pool/ssd-nas/vcenter/ *(rw,sync,no_root_squash)"
+  - "/big-ssd-pool/ssd-nas/veeam/ *(rw,sync,no_root_squash)"
+  - "/big-ssd-pool/ssd-nas/download/ *(rw)"
 
 nmcli_interfaces:
   - name: ens192

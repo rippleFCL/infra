@@ -22,6 +22,16 @@
       tags:
         - docker
         - unifi_controller
+    - role: nginx_ping
+      when: "'nginx_ping' in deploy_docker_roles | default([])"
+      tags:
+        - docker
+        - nginx_ping
+    - role: gravity
+      when: "'gravity' in deploy_docker_roles | default([])"
+      tags:
+        - docker
+        - gravity
   tasks:
     - block:
       - name: Ensure deb deps

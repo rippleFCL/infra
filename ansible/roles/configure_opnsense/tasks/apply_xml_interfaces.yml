@@ -5,7 +5,7 @@
     set_children: "{{ configure_opnsense_pppoe_interfaces | interface2xml }}"
     pretty_print: true
   when: configure_opnsense_pppoe_interfaces is defined
-  notify: Reload opnsense
+  notify: Reboot opnsense router
 
 - name: Assign interfaces
   community.general.xml:
@@ -19,4 +19,4 @@
       }}
     pretty_print: true
   when: configure_opnsense_interfaces is defined
-  notify: Reload opnsense
+  notify: Reboot opnsense router

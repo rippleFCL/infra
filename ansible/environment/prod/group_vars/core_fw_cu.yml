@@ -1,11 +1,15 @@
 internal_domain: int.ripplefcl.com
 
 configure_opnsense_interfaces:
-  mgmt:
+  network_mgmt:
     identifier: lan
-    vlan: mgmt
+    vlan: network_mgmt
     config:
       if: vmx0
+
+  mgmt:
+    identifier: opt9
+    vlan: mgmt
 
   lan:
     identifier: opt1
@@ -14,10 +18,14 @@ configure_opnsense_interfaces:
   wlan:
     identifier: opt2
     vlan: wlan
+    config:
+      if: vmx2
 
   guest_wlan:
     identifier: opt3
     vlan: guest_wlan
+    config:
+      if: vmx3
 
   ir_transit:
     identifier: opt4
@@ -64,9 +72,8 @@ configure_opnsense_interfaces:
       subnetv6: "128"
 
 configure_opnsense_vlans:
+  mgmt: vmx1
   lan: vmx1
-  wlan: vmx1
-  guest_wlan: vmx1
   ir_transit: vmx1
   fw_cluster_pfsync: vmx1
   vm_network: vmx1
@@ -86,28 +93,35 @@ configure_opnsense_vip:
     vhid: 2
     password: test
     mode: "carp"
-    address: "10.0.2.1/24"
+    address: "10.0.3.1/24"
   - interface: "wlan"
     vlan: wlan
     description: wlan carp
     vhid: 3
     password: test
     mode: "carp"
-    address: "10.0.4.1/24"
+    address: "10.0.5.1/24"
   - interface: "guest_wlan"
     vlan: guest_wlan
     description: guest_wlan carp
     vhid: 4
     password: test
     mode: "carp"
-    address: "10.0.5.1/24"
+    address: "10.0.6.1/24"
   - interface: "vm_network"
     vlan: vm_network
     description: vm_network carp
     vhid: 5
     password: test
     mode: "carp"
-    address: "10.0.6.1/24"
+    address: "10.0.7.1/24"
+  - interface: "mgmt"
+    vlan: vm_network
+    description: mgmt carp
+    vhid: 6
+    password: test
+    mode: "carp"
+    address: "10.0.1.1/24"
 
 
 configure_opnsense_fw_aliases:
@@ -128,6 +142,7 @@ configure_opnsense_rule_blocks:
   block_all:
     - description: "block all"
       log: true
+      quick: false
       action: "block"
 
   allow_internet:
@@ -173,7 +188,7 @@ configure_opnsense_rule_blocks:
       action: pass
       protocol: "TCP"
       destination:
-        ip: 10.0.6.201
+        ip: 10.0.7.20
         port: 32400
       source:
         network: self
@@ -181,8 +196,24 @@ configure_opnsense_rule_blocks:
       action: pass
       protocol: "TCP"
       destination:
-        ip: 10.0.6.201
+        ip: 10.0.7.20
         port: 5055
+      source:
+        network: self
+    - description: "allow radarr"
+      action: pass
+      protocol: "TCP"
+      destination:
+        ip: 10.0.7.20
+        port: 7878
+      source:
+        network: self
+    - description: "allow sonarr"
+      action: pass
+      protocol: "TCP"
+      destination:
+        ip: 10.0.7.20
+        port: 8989
       source:
         network: self
 
@@ -214,16 +245,21 @@ configure_opnsense_rule_blocks:
       source:
         network: self
 
-
   allow_services:
     - description: "allow taskin"
       action: pass
       protocol: "TCP"
       destination:
-        ip: 10.0.6.202
+        ip: 10.0.7.21
         port: 8888
       source:
         network: self
+
+  allow_dnet_net:
+    - description: "allow dnat net"
+      action: pass
+      destination:
+        network: 192.168.1.0/24
 
 configure_opnsense_rules:
   - interface: "mgmt_vpn"
@@ -233,6 +269,14 @@ configure_opnsense_rules:
       allow_mgmt_vpn:
         - description: allow all mgmt vpn traffic
           action: pass
+
+  - interface: mgmt
+    rule_blocks:
+      - "allow_dhcp"
+      - "allow_dns"
+      - "allow_internet"
+      - "allow_icmp"
+      - "block_all"
 
   - interface: "fw_cluster_pfsync"
     rule_blocks:
@@ -285,6 +329,7 @@ configure_opnsense_rules:
       - "allow_icmp"
       - "allow_dns"
       - "allow_internet"
+      - "allow_dnet_net"
       - "block_all"
 
   - interface: "ir_transit"
@@ -292,7 +337,28 @@ configure_opnsense_rules:
       - "allow_icmp"
       - "allow_dns"
       - "allow_wireguard"
+      - "allow_external"
       - "block_all"
+    local_rule_blocks:
+      allow_external:
+        - description: allow plex external
+          action: pass
+          protocol: "TCP"
+          destination:
+            ip: 10.0.7.20
+            port: 32400
+        - description: allow nginx-ping external
+          action: pass
+          protocol: "TCP"
+          destination:
+            ip: 10.0.7.21
+            port: 80
+        - description: allow overseerr external
+          action: pass
+          protocol: "TCP"
+          destination:
+            ip: 10.0.7.20
+            port: 5055
 
   - interface: "jens_link"
     rule_blocks:
@@ -337,51 +403,65 @@ configure_opnsense_routes:
     description: jens link ts
 
 configure_opnsense_general_settings:
-  dnsserver: "10.0.6.10"
+  dnsserver: "10.0.7.10"
+  dnsserver: "10.0.7.11"
   timezone: Europe/London
 
 configure_opnsense_dhcp_relay:
   destinations:
-    - uuid: 06a54514-10c4-4fad-b68f-fdd88bf9ffb4
-      server: 10.0.6.10
+    - server: 10.0.7.10
       name: tech
+    - server: 10.0.7.11
+      name: tech2
   relays:
     - enabled: 1
       interface: lan
-      uuid: a5b987a1-6df0-49b8-b4f1-d7ecbb7abfed
       agent_info: 0
       destination: tech
     - enabled: 1
       interface: guest_wlan
-      uuid: dc7876b8-88ec-4b3c-8915-0e4ec9e108fd
       agent_info: 0
       destination: tech
     - enabled: 1
       interface: wlan
-      uuid: 54f3e538-f913-4d33-b08e-5bf848739162
       agent_info: 0
       destination: tech
     - enabled: 1
       interface: vm_network
-      uuid: fd9a2b69-2137-4a30-8fe2-d67e67482678
+      agent_info: 0
+      destination: tech
+    - enabled: 1
+      interface: network_mgmt
       agent_info: 0
       destination: tech
     - enabled: 1
       interface: mgmt
-      uuid: a808967c-3a38-4cb5-be74-33eb5a81373e
       agent_info: 0
       destination: tech
-
-
-configure_opnsense_dns_forwarding:
-  - server: "10.0.6.10"
-    domain: ripplefcl.com
-
-  - server: "10.0.6.10"
-    domain: ""
-
-  - server: "10.0.6.9"
-    domain: ""
+    - enabled: 1
+      interface: lan
+      agent_info: 0
+      destination: tech2
+    - enabled: 1
+      interface: guest_wlan
+      agent_info: 0
+      destination: tech2
+    - enabled: 1
+      interface: wlan
+      agent_info: 0
+      destination: tech2
+    - enabled: 1
+      interface: vm_network
+      agent_info: 0
+      destination: tech2
+    - enabled: 1
+      interface: network_mgmt
+      agent_info: 0
+      destination: tech2
+    - enabled: 1
+      interface: mgmt
+      agent_info: 0
+      destination: tech2
 
 configure_opnsense_wireguard:
   peers:

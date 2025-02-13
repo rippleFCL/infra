@@ -1,3 +1,10 @@
+- name: Ensure deb deps
+  ansible.builtin.apt:
+    name:
+      - python3-pip
+      - python3-yaml
+    state: present
+
 - name: Ensure appdata path exists
   ansible.builtin.file:
     path: "{{ item }}"
@@ -11,8 +18,6 @@
     - "{{ [unifi_controller_mongo_dir, 'data'] | path_join }}"
     - "{{ unifi_controller_appdata_dir }}"
 
-
-
 - name: Template MongoDB init file
   ansible.builtin.copy:
     src: dbinitinator.sh
@@ -21,12 +26,14 @@
     group: "1000"
     mode: '0755'
 
+
 - name: Create docker stack
   community.docker.docker_compose_v2:
     project_name: "unifi-controller"
     definition:
       services:
         unifi-db:
+          restart: unless-stopped
           image: docker.io/mongo:7.0.9
           container_name: unifi-db
           volumes:
@@ -42,6 +49,7 @@
             MONGO_AUTHSOURCE: admin
         unifi-controller:
           image: lscr.io/linuxserver/unifi-network-application:latest
+          restart: unless-stopped
           ports:
             - 8443:8443       # UniFi web admin port
             - 3478:3478/udp   # UniFi STUN port

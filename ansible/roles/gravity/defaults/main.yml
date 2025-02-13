@@ -1,0 +1,18 @@
+---
+
+gravity_version: latest
+
+gravity_primary_host: ''
+
+gravity_options:
+  # INSTANCE_IDENTIFIER:
+  # ADMIN_PASSWORD:
+  # SENTRY_ENABLED:
+  INSTANCE_IP: "{{ net_config.address }}" # Host variable for static IP
+  INTERFACE_LISTEN: '0.0.0.0'
+
+# Join string should include only the token. Role appends join URL.
+# e.g. for join string 'foo1bar2baz3,http://1.2.3.4:8008', include only 'foo1bar2baz3'
+# gravity_etcd_join_cluster_string:
+#   host1: <key>
+#   host2: <key>

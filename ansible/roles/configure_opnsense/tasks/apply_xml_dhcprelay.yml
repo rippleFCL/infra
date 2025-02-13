@@ -4,4 +4,4 @@
     xpath: /opnsense/OPNsense/DHCRelay
     set_children: "{{  configure_opnsense_dhcp_relay | dhcprelay2xml(configure_opnsense_interfaces) }}"
     pretty_print: true
-  notify: Reload opnsense
+  notify: Reboot opnsense router

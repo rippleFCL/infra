@@ -4,7 +4,7 @@ opnsense_api_access_secret: "{{ lookup('bws_cache', 'opns_cfw2_api_access_secret
 
 
 bootstrap_opnsense_network_info:
-  ip: 10.0.1.3
+  ip: 10.0.2.2
   subnet: 24
   name: mgmt
 
@@ -23,14 +23,16 @@ configure_opnsense_hostinfo:
 configure_opnsense_interfaces_overrides:
   mgmt:
     ipaddr: "10.0.1.3"
+  network_mgmt:
+    ipaddr: "10.0.2.2"
   lan:
-    ipaddr: "10.0.2.3"
+    ipaddr: "10.0.3.3"
   wlan:
-    ipaddr: "10.0.4.3"
-  guest_wlan:
     ipaddr: "10.0.5.3"
-  vm_network:
+  guest_wlan:
     ipaddr: "10.0.6.3"
+  vm_network:
+    ipaddr: "10.0.7.3"
   ir_transit:
     ipaddr: "10.1.2.4"
   fw_cluster_pfsync:
