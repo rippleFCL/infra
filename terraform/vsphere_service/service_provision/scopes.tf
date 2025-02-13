@@ -4,28 +4,45 @@ locals {
       subnet_cidr = "10.0.1.0/24"
       start       = "10.0.1.200"
       end         = "10.0.1.254"
-      router      = "10.0.1.1"
+      options      = {
+        router = "10.0.1.1"
+      }
       zone        = gravity_dns_zone.ripplefcl_com.id
     }
     lan       = {
       subnet_cidr = "10.0.3.0/24"
       start       = "10.0.3.100"
       end         = "10.0.3.254"
-      router      = "10.0.3.1"
+      options      = {
+        router = "10.0.3.1"
+      }
       zone        = gravity_dns_zone.ripplefcl_com.id
     }
     wlan       = {
       subnet_cidr = "10.0.5.0/24"
       start       = "10.0.5.100"
       end         = "10.0.5.254"
-      router      = "10.0.5.1"
+      options      = {
+        router = "10.0.5.1"
+      }
+      zone        = gravity_dns_zone.ripplefcl_com.id
+    }
+    guest_wlan       = {
+      subnet_cidr = "10.0.6.0/24"
+      start       = "10.0.6.100"
+      end         = "10.0.6.254"
+      options      = {
+        router = "10.0.6.1"
+      }
       zone        = gravity_dns_zone.ripplefcl_com.id
     }
     vm_network       = {
       subnet_cidr = "10.0.7.0/24"
       start       = "10.0.7.200"
       end         = "10.0.7.254"
-      router      = "10.0.7.1"
+      options      = {
+        router = "10.0.7.1"
+      }
       zone        = gravity_dns_zone.ripplefcl_com.id
     }
   })
@@ -46,9 +63,12 @@ resource "gravity_dhcp_scope" "dns_scope" {
   }
 
   # Set DHCP Options
-  option {
-    tag_name = "router"
-    value    = each.value.router
+  dynamic "option" {
+    for_each = each.value.options
+    content {
+      tag_name = option.key
+      value    = option.value
+    }
   }
 
   # option {
