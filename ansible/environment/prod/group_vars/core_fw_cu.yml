@@ -1,11 +1,17 @@
 internal_domain: int.ripplefcl.com
 
+port_mapping:
+  vm_mgmt_net: vmx1
+  routing_trunk: vmx2
+  wifi: vmx3
+  guest_wifi: vmx0
+
 configure_opnsense_interfaces:
   network_mgmt:
     identifier: lan
     vlan: network_mgmt
     config:
-      if: vmx0
+      if: "{{ port_mapping.vm_mgmt_net }}"
 
   mgmt:
     identifier: opt9
@@ -19,13 +25,13 @@ configure_opnsense_interfaces:
     identifier: opt2
     vlan: wlan
     config:
-      if: vmx2
+      if: "{{ port_mapping.wifi }}"
 
   guest_wlan:
     identifier: opt3
     vlan: guest_wlan
     config:
-      if: vmx3
+      if: "{{ port_mapping.guest_wifi }}"
 
   ir_transit:
     identifier: opt4
@@ -72,11 +78,11 @@ configure_opnsense_interfaces:
       subnetv6: "128"
 
 configure_opnsense_vlans:
-  mgmt: vmx1
-  lan: vmx1
-  ir_transit: vmx1
-  fw_cluster_pfsync: vmx1
-  vm_network: vmx1
+  mgmt: "{{ port_mapping.routing_trunk }}"
+  lan: "{{ port_mapping.routing_trunk }}"
+  ir_transit: "{{ port_mapping.routing_trunk }}"
+  fw_cluster_pfsync: "{{ port_mapping.routing_trunk }}"
+  vm_network: "{{ port_mapping.routing_trunk }}"
 
 
 configure_opnsense_vip:
@@ -137,6 +143,11 @@ configure_opnsense_fw_aliases:
     content:
       - "10.120.0.0/16"
       - "10.64.0.0/10"
+  - name: dns_servers
+    type: host
+    content:
+      - "10.0.7.10"
+      - "10.0.7.11"
 
 configure_opnsense_rule_blocks:
   block_all:
@@ -162,6 +173,14 @@ configure_opnsense_rule_blocks:
         network: self
       destination:
         ip: self
+        port: 53
+    - description: "allow direct dns"
+      action: "pass"
+      protocol: UDP
+      source:
+        network: self
+      destination:
+        alias: dns_servers
         port: 53
 
   allow_icmp:
@@ -214,6 +233,14 @@ configure_opnsense_rule_blocks:
       destination:
         ip: 10.0.7.20
         port: 8989
+      source:
+        network: self
+    - description: "allow sab"
+      action: pass
+      protocol: "TCP"
+      destination:
+        ip: 10.0.7.20
+        port: 8080
       source:
         network: self
 
@@ -427,14 +454,6 @@ configure_opnsense_dhcp_relay:
       agent_info: 0
       destination: tech
     - enabled: 1
-      interface: vm_network
-      agent_info: 0
-      destination: tech
-    - enabled: 1
-      interface: network_mgmt
-      agent_info: 0
-      destination: tech
-    - enabled: 1
       interface: mgmt
       agent_info: 0
       destination: tech
@@ -448,14 +467,6 @@ configure_opnsense_dhcp_relay:
       destination: tech2
     - enabled: 1
       interface: wlan
-      agent_info: 0
-      destination: tech2
-    - enabled: 1
-      interface: vm_network
-      agent_info: 0
-      destination: tech2
-    - enabled: 1
-      interface: network_mgmt
       agent_info: 0
       destination: tech2
     - enabled: 1
