@@ -11,7 +11,7 @@ deploy_docker_service_definitions:
   plex_stack:
     services:
       plex:
-        image:  lscr.io/linuxserver/plex:1.41.3
+        image:  lscr.io/linuxserver/plex:1.41.5
         container_name: plex
         network_mode: host
         runtime: nvidia
