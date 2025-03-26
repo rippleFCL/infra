@@ -39,7 +39,6 @@
           volumes:
             - "{{ [unifi_controller_mongo_dir, 'data'] | path_join }}:/data/db"
             - "{{ [unifi_controller_mongo_dir, 'mong-init.sh'] | path_join }}:/docker-entrypoint-initdb.d/init-mongo.sh:ro"
-          restart: unless-stopped
           environment:
             MONGO_INITDB_ROOT_USERNAME: root
             MONGO_INITDB_ROOT_PASSWORD: "{{ lookup('bws_cache', 'unifi_controller_db_password').value }}"
