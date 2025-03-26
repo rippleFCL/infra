@@ -29,9 +29,3 @@ deploy_docker_services:
 install_container_toolkit: true
 nvidia_drivers_install: true
 nvidia_cuda_pkg_version: "12.5.1-1"
-
-docker_overieds:
-  plonk:
-    services:
-      environment:
-        bla:bla
