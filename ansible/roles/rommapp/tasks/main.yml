@@ -1,0 +1,63 @@
+- name: debug
+  ansible.builtin.debug:
+    msg: "{{ rommapp_dirs }}"
+
+- name: Ensure appdata path exists
+  ansible.builtin.file:
+    path: "{{ item.value }}"
+    owner: "1000"
+    group: "1000"
+    mode: '0775'
+    state: directory
+  loop: "{{ rommapp_dirs | dict2items }}"
+
+- name: Create docker stack
+  community.docker.docker_compose_v2:
+    project_name: "rommapp"
+    definition:
+      services:
+        romm:
+          image: rommapp/romm:latest
+          container_name: romm
+          restart: unless-stopped
+          environment:
+            - DB_HOST=romm-db
+            - DB_NAME=romm # Should match MARIADB_DATABASE in mariadb
+            - DB_USER=romm-user # Should match MARIADB_USER in mariadb
+            - "DB_PASSWD={{ lookup('bws_cache', 'rommapp_db_pwd') }}" # Should match MARIADB_PASSWORD in mariadb
+            - "ROMM_AUTH_SECRET_KEY={{ lookup('bws_cache', 'rommapp_auth_key') }}" # Generate a key with `openssl rand -hex 32`
+            - "IGDB_CLIENT_ID={{ lookup('bws_cache', 'igdb_client_id').value }}" # Generate an ID and SECRET in IGDB
+            - "IGDB_CLIENT_SECRET={{ lookup('bws_cache', 'igdb_client_secret').value }}" # https://api-docs.igdb.com/#account-creation
+            #- MOBYGAMES_API_KEY= # https://www.mobygames.com/info/api/
+            #- STEAMGRIDDB_API_KEY= # https://github.com/rommapp/romm/wiki/Generate-API-Keys#steamgriddb
+          volumes:
+            - "{{ rommapp_dirs.rommapp_resources }}:/romm/resources" # Resources fetched from IGDB (covers, screenshots, etc.)
+            - "{{ rommapp_dirs.rommapp_redis}}:/redis-data" # Cached data for background tasks
+            - "{{ rommapp_dirs.rommapp_data }}/library:/romm/library" # Your game library. Check https://github.com/rommapp/romm?tab=readme-ov-file#folder-structure for more details.
+            - "{{ rommapp_dirs.rommapp_data }}/assets:/romm/assets" # Uploaded saves, states, etc.
+            - "{{ rommapp_dirs.rommapp_data }}/config:/romm/config" # Path where config.yml is stored
+          ports:
+            - 8100:8080
+          depends_on:
+            romm-db:
+              condition: service_healthy
+              restart: true
+
+        romm-db:
+          image: mariadb:latest
+          container_name: romm-db
+          restart: unless-stopped
+          environment:
+            - "MARIADB_ROOT_PASSWORD={{ lookup('bws_cache', 'rommapp_db_root_pwd') }}" # Use a unique, secure password
+            - MARIADB_DATABASE=romm
+            - MARIADB_USER=romm-user
+            - "MARIADB_PASSWORD={{ lookup('bws_cache', 'rommapp_db_pwd') }}"
+          volumes:
+            - "{{ rommapp_dirs.rommapp_database }}:/var/lib/mysql"
+          healthcheck:
+            test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+            start_period: 30s
+            start_interval: 10s
+            interval: 10s
+            timeout: 5s
+            retries: 5

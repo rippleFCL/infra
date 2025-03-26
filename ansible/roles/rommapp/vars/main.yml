@@ -1,0 +1,12 @@
+---
+rommapp_base: "{{ [app_base_dir, 'rommapp'] | path_join }}"
+
+rommapp_dirs:
+  rommapp_base: "{{ rommapp_base }}"
+  rommapp_redis: "{{ [rommapp_base, 'redis'] | path_join }}"
+  rommapp_resources: "{{ [rommapp_base, 'resources'] | path_join }}"
+  rommapp_data: "{{ [rommapp_base, 'data'] | path_join }}"
+  rommapp_database: "{{ [rommapp_base, 'unifi'] | path_join }}"
+
+
+
