@@ -11,6 +11,8 @@ nmcli_interfaces:
 
 deploy_docker_roles:
   - languagetool
+  - nginx_ping
+  - prometheus
 
 deploy_docker_services:
   - taskin
