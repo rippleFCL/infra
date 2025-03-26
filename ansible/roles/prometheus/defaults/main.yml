@@ -1,0 +1,16 @@
+---
+
+prometheus_instance_suffix: ''
+
+# Example: <fqdn>:<port>
+prometheus_docker_network: prometheus{{ instance_suffix }}
+prometheus_open_port: true
+prometheus_extra_networks: []
+
+prometheus_base_path: "{{ app_base_dir }}/prometheus{{ instance_suffix }}"
+
+prometheus_users: []
+
+prometheus_port: 9090
+
+prometheus_extra_args: []

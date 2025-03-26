@@ -1,0 +1,24 @@
+global:
+  scrape_interval: 15s # How frequently to scrape targets.
+  evaluation_interval: 15s # How frequently to evaluate rules.
+  scrape_timeout: 10s # How long until a scrape request times out.
+
+# Load and evaluate rules in this file every 'evaluation_interval' seconds.
+# rule_files:
+#   - "alert.rules"
+#   - "first.rules"
+#   - "second.rules"
+
+# alert
+# alerting:
+#   alertmanagers:
+#   - scheme: http
+#     static_configs:
+#     - targets:
+#       - "alertmanager:9093"
+
+# A scrape configuration containing exactly one endpoint to scrape:
+# Here it's Prometheus itself.
+scrape_configs:
+  # The job name is added as a label `job=<job_name>` to any timeseries scraped from this config.
+{{ prometheus_scrape_configs | to_nice_yaml(sort_keys=false, indent=2) }}

@@ -1,0 +1,24 @@
+---
+prometheus_base_path: '{{ app_base_dir }}prometheus'
+prometheus_app_config_path: /etc/prometheus/prometheus.yml
+prometheus_web_config_path: /etc/prometheus/web.yml
+
+prometheus_cmd_base:
+  - --config.file={{ prometheus_app_config_path }}
+  - --web.config.file={{ prometheus_web_config_path }}
+
+prometheus_cmd_merged: "{{ prometheus_cmd_base + prometheus_extra_args }}"
+prometheus_service_def:
+  services:
+    prometheus:
+      image: prom/prometheus:v2.53.4
+      command: "{{ prometheus_cmd_merged }}"
+      extra_hosts:
+        host.docker.internal: host-gateway
+      user: 1000:1000
+      volumes:
+        - "{{ prometheus_base_path }}/prometheus.yml:{{ prometheus_app_config_path }}:ro"
+        - "{{ prometheus_base_path }}/web.yml:{{ prometheus_web_config_path }}:ro"
+        - "{{ prometheus_base_path }}/mimir-pass.txt:/etc/prometheus/mimir-pass.txt:ro"
+        - "{{ prometheus_base_path }}/data:/prometheus/data"
+      ports: "{{ [prometheus_port ~ ':9090'] if prometheus_open_port else [] }}"
