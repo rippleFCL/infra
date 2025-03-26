@@ -1,0 +1,17 @@
+{
+  "Bitwarden Secret Lookup scalar": {
+    "prefix": "bws",
+    "body": ">-\n\t{{ lookup('ripplefcl.bwscache.secret', '${1:secret ID/key}').value }}",
+    "description": "Bitwarden Secrets Manager secret lookup"
+  },
+  "Bitwarden Secret Lookup (Quoted)": {
+    "prefix": "bwsq",
+    "body": "\"{{ lookup('ripplefcl.bwscache.secret', '${1:secret ID/key}').value }}\"",
+    "description": "Bitwarden Secrets Manager secret lookup (quoted)"
+  },
+  "Bitwarden Secret Lookup (Unquoted)": {
+    "prefix": "bwsq",
+    "body": "{{ lookup('ripplefcl.bwscache.secret', '${1:secret ID/key}').value }}",
+    "description": "Bitwarden Secrets Manager secret lookup (quoted)"
+  },
+}
