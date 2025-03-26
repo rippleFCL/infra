@@ -141,3 +141,13 @@ deploy_docker_service_definitions:
           - 8888:8080
         environment:
           API_URL: http://taskin-api:8080/
+  grafana:
+    services:
+      grafana:
+        image: grafana/grafana
+        user: 1000:1000
+        container_name: grafana
+        ports:
+          - '3000:3000'
+        volumes:
+          - /mnt/docking_data/grafana:/var/lib/grafana
