@@ -32,6 +32,11 @@
       tags:
         - docker
         - gravity
+    - role: rommapp
+      when: "'rommapp' in deploy_docker_roles | default([])"
+      tags:
+        - docker
+        - rommapp
   tasks:
     - block:
       - name: Ensure deb deps
@@ -45,6 +50,6 @@
         community.docker.docker_compose_v2:
           project_name: "{{ item }}"
           definition: "{{ deploy_docker_service_definitions[item] }}"
-        loop: "{{ deploy_docker_services }}"
+        loop: "{{ deploy_docker_services | default([]) }}"
       tags:
         - docker
