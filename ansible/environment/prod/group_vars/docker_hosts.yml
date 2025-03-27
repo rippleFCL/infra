@@ -27,7 +27,6 @@ deploy_docker_service_definitions:
           - /mnt/plex_media/media/tv:/tv
           - /mnt/plex_media/media/movies:/movies
         restart: unless-stopped
-
       overseerr:
         image: sctx/overseerr:latest
         container_name: overseerr
@@ -82,7 +81,7 @@ deploy_docker_service_definitions:
         volumes:
           - /mnt/docking_data/sabnzbd/config:/config
           - /mnt/plex_media/downloaded/:/data/downloaded
-          - /mnt/plex_media/downloading/:/data/downloading
+          - /mnt/download_pool/sab/:/data/downloading
         restart: unless-stopped
   web_proxy:
     web:
