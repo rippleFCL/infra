@@ -27,8 +27,6 @@ configure_switch_bridges:
     vlan_filtering: true
     admin_mac: 74:4D:28:E3:3E:B9
     ports:
-      - interface: mgmt_port
-        untagged: mgmt
       - interface: esxi_storage2_uplink
         tagged:
           - mgmt
@@ -63,7 +61,6 @@ configure_switch_bridges:
       - interface: jankvisor_uplink
         tagged:
           - lan
-          - mgmt
           - network_mgmt
 
 configure_switch_vlan_interfaces:
