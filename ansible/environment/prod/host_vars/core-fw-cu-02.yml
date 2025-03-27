@@ -37,3 +37,4 @@ configure_opnsense_interfaces_overrides:
     ipaddr: "10.1.2.4"
   fw_cluster_pfsync:
     ipaddr: "10.1.4.2"
+
