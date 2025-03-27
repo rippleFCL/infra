@@ -5,6 +5,7 @@
     description: "{{ item.description }}"
     interface: "{{ configure_opnsense_interfaces[item.interface]['identifier'] }}"
     source_net: "{{ item.source_net }}"
+    destination_net: "{{ item.destination_net | default(omit) }}"
     target: "{{ configure_opnsense_interfaces[item.target]['identifier'] }}ip"
     log: "{{ item.log | default(false) }}"
   loop: "{{ configure_opnsense_snat }}"
