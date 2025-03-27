@@ -18,3 +18,11 @@ configure_opnsense_routes:
   - gateway: jens_link
     network: "10.64.0.0/10"
     description: jens link ts
+
+configure_opnsense_snat:
+  - description: network_mgmt snat
+    target: network_mgmt
+    interface: network_mgmt
+    source_net: "{{ network_spec['vpn']['mgmt_vpn'] }}"
+    destination_net: "{{ network_spec['vlan']['network_mgmt']['network'] }}"
+
