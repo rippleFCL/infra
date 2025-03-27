@@ -4,11 +4,13 @@ configure_opnsense_interfaces:
     identifier: lan
     vlan: network_mgmt
     config:
-      if: "{{ port_mapping.vm_mgmt_net }}"
+      if: "{{ port_mapping.network_mgmt }}"
 
   mgmt:
     identifier: opt9
     vlan: mgmt
+    config:
+      if: "{{ port_mapping.mgmt }}"
 
   lan:
     identifier: opt1
