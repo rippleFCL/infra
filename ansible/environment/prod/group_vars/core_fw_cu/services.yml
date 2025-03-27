@@ -44,7 +44,22 @@ configure_opnsense_wireguard:
     - name: ripple_phone
       public_key: CVZZlGsrwaVRZW37f0YAcUBN/BXTN1HHZMlZI1T99nc=
       allowed_ips:
-        - 10.0.20.0/24
+        - 10.0.20.2/32
+
+    - name: ripple_lappy
+      public_key: tsZZ4ovA/o+v31hqcIIzdz7Q9ZyKCVqOE8FtqZ2nIVc=
+      allowed_ips:
+        - 10.0.20.3/32
+
+    - name: callum_phone
+      public_key: 7UwCqNePzODPmIMuZr9ypWY7CyDsT8Mjd3MgxKiLZQY=
+      allowed_ips:
+        - 10.0.20.4/32
+
+    - name: ripple_desktop
+      public_key: v+jUuzEQ7y79NBMdRpJX7gza27QE4JY5zICf2Pu5tU4=
+      allowed_ips:
+        - 10.0.20.5/32
 
     - name: jens
       public_key: DIvPceAObyD2kgxRoswruEky1EY6UKjEbi7278lqnmE=
@@ -58,9 +73,12 @@ configure_opnsense_wireguard:
     - name: mgmt_vpn
       peers:
         - ripple_phone
+        - ripple_lappy
+        - callum_phone
+        - ripple_desktop
       tunnel_ips:
         - 10.0.20.1/24
-      public_key: "{{ lookup('bws_cache', 'wireguard_server_pubkey').value }}"
+      public_key: khILSbosdXpwJq9hAvO+yr0l/NiLnf3UKgPaVWUW3gE=
       private_key: "{{ lookup('bws_cache', 'wireguard_server_prikey').value }}"
       port: 51950
       vip: "10.1.2.2"
