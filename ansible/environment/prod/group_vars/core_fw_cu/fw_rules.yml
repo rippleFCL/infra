@@ -1,0 +1,120 @@
+
+
+configure_opnsense_rules:
+  - interface: "mgmt_vpn"
+    rule_blocks:
+      - "allow_mgmt_vpn"
+    local_rule_blocks:
+      allow_mgmt_vpn:
+        - description: allow all mgmt vpn traffic
+          action: pass
+
+  - interface: mgmt
+    rule_blocks:
+      - "allow_dhcp"
+      - "allow_dns"
+      - "allow_internet"
+      - "allow_icmp"
+      - "block_all"
+
+  - interface: "fw_cluster_pfsync"
+    rule_blocks:
+      - "allow_all"
+    local_rule_blocks:
+      allow_all:
+        - description: "allow all"
+          action: "pass"
+
+  - interface: "lan"
+    rule_blocks:
+      - "allow_to_jens"
+      - "allow_dhcp"
+      - "allow_dns"
+      - "allow_internet"
+      - "allow_wlan_access"
+      - "allow_media"
+      - "allow_services"
+      - "block_all"
+    local_rule_blocks:
+      allow_wlan_access:
+        - description: "allow wlan"
+          action: pass
+          source:
+            network: lan
+          destination:
+            network: wlan
+
+  - interface: "wlan"
+    rule_blocks:
+      - "allow_to_jens"
+      - allow_dhcp
+      - "allow_dns"
+      - "allow_internet"
+      - "allow_media"
+      - "allow_services"
+      - "block_all"
+
+  - interface: "guest_wlan"
+    rule_blocks:
+      - "allow_dhcp"
+      - "allow_dns"
+      - "allow_internet"
+      - "block_all"
+
+  - interface: "vm_network"
+    rule_blocks:
+      - "allow_to_jens"
+      - "allow_dhcp"
+      - "allow_icmp"
+      - "allow_dns"
+      - "allow_internet"
+      - "allow_dnet_net"
+      - "block_all"
+
+  - interface: "ir_transit"
+    rule_blocks:
+      - "allow_icmp"
+      - "allow_dns"
+      - "allow_wireguard"
+      - "allow_external"
+      - "block_all"
+    local_rule_blocks:
+      allow_external:
+        - description: allow plex external
+          action: pass
+          protocol: "TCP"
+          destination:
+            ip: 10.0.7.20
+            port: 32400
+        - description: allow nginx-ping external
+          action: pass
+          protocol: "TCP"
+          destination:
+            ip: 10.0.7.21
+            port: 80
+        - description: allow overseerr external
+          action: pass
+          protocol: "TCP"
+          destination:
+            ip: 10.0.7.20
+            port: 5055
+
+  - interface: "jens_link"
+    rule_blocks:
+      - "allow_icmp"
+      - "allow_jens"
+      - "block_all"
+
+
+    local_rule_blocks:
+      allow_jens:
+        - description: allow vpn traffic
+          action: "pass"
+          source:
+            network: self
+
+        - description: "allow it mate jens"
+          action: "pass"
+          source:
+            alias: jens_ip_space
+

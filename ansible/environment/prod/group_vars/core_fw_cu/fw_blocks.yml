@@ -1,0 +1,158 @@
+
+configure_opnsense_fw_aliases:
+  - name: private_ips
+    type: network
+    content:
+      - "10.0.0.0/8"
+      - "172.16.0.0/12"
+      - "192.168.0.0/16"
+
+  - name: jens_ip_space
+    type: network
+    content:
+      - "10.120.0.0/16"
+      - "10.64.0.0/10"
+  - name: dns_servers
+    type: host
+    content:
+      - "10.0.7.10"
+      - "10.0.7.11"
+
+configure_opnsense_rule_blocks:
+  block_all:
+    - description: "block all"
+      log: true
+      quick: false
+      action: "block"
+
+  allow_internet:
+    - description: "allow internet"
+      action: "pass"
+      source:
+        network: "self"
+      destination:
+        alias: "private_ips"
+        invert: true
+
+  allow_dns:
+    - description: "allow dns"
+      action: "pass"
+      protocol: UDP
+      source:
+        network: self
+      destination:
+        ip: self
+        port: 53
+    - description: "allow direct dns"
+      action: "pass"
+      protocol: UDP
+      source:
+        network: self
+      destination:
+        alias: dns_servers
+        port: 53
+
+  allow_icmp:
+    - description: "allow icmp"
+      action: "pass"
+      protocol: "ICMP"
+      destination:
+        ip: self
+
+
+  allow_dhcp:
+    - description: "allow dhcp"
+      action: "pass"
+      protocol: "UDP"
+      destination:
+        ip: 255.255.255.255
+        port: 67
+      source:
+        ip: 0.0.0.0
+        port: 68
+
+  allow_media:
+    - description: "allow plex"
+      action: pass
+      protocol: "TCP"
+      destination:
+        ip: 10.0.7.20
+        port: 32400
+      source:
+        network: self
+    - description: "allow overseerr"
+      action: pass
+      protocol: "TCP"
+      destination:
+        ip: 10.0.7.20
+        port: 5055
+      source:
+        network: self
+    - description: "allow radarr"
+      action: pass
+      protocol: "TCP"
+      destination:
+        ip: 10.0.7.20
+        port: 7878
+      source:
+        network: self
+    - description: "allow sonarr"
+      action: pass
+      protocol: "TCP"
+      destination:
+        ip: 10.0.7.20
+        port: 8989
+      source:
+        network: self
+    - description: "allow sab"
+      action: pass
+      protocol: "TCP"
+      destination:
+        ip: 10.0.7.20
+        port: 8080
+      source:
+        network: self
+
+  allow_wireguard:
+    - description: allow jens link
+      action: pass
+      protocol: "UDP"
+      destination:
+        ip: 10.1.2.2
+        port: 42069
+    - description: allow mgmt link
+      action: pass
+      protocol: "UDP"
+      destination:
+        ip: 10.1.2.2
+        port: 51950
+
+  allow_to_jens:
+    - description: allow traffic to jens network
+      action: pass
+      destination:
+        alias: jens_ip_space
+      source:
+        network: self
+    - description: allow traffic to jens transit
+      action: pass
+      destination:
+        network: jens_link
+      source:
+        network: self
+
+  allow_services:
+    - description: "allow taskin"
+      action: pass
+      protocol: "TCP"
+      destination:
+        ip: 10.0.7.21
+        port: 8888
+      source:
+        network: self
+
+  allow_dnet_net:
+    - description: "allow dnat net"
+      action: pass
+      destination:
+        network: 192.168.1.0/24

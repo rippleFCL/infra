@@ -1,0 +1,44 @@
+
+configure_opnsense_vip:
+  - interface: "ir_transit"
+    vlan: ir_transit
+    description: inter router transit carp
+    vhid: 1
+    password: test
+    mode: "carp"
+    address: "10.1.2.2/24"
+  - interface: "lan"
+    vlan: lan
+    description: lan carp
+    vhid: 2
+    password: test
+    mode: "carp"
+    address: "10.0.3.1/24"
+  - interface: "wlan"
+    vlan: wlan
+    description: wlan carp
+    vhid: 3
+    password: test
+    mode: "carp"
+    address: "10.0.5.1/24"
+  - interface: "guest_wlan"
+    vlan: guest_wlan
+    description: guest_wlan carp
+    vhid: 4
+    password: test
+    mode: "carp"
+    address: "10.0.6.1/24"
+  - interface: "vm_network"
+    vlan: vm_network
+    description: vm_network carp
+    vhid: 5
+    password: test
+    mode: "carp"
+    address: "10.0.7.1/24"
+  - interface: "mgmt"
+    vlan: vm_network
+    description: mgmt carp
+    vhid: 6
+    password: test
+    mode: "carp"
+    address: "10.0.1.1/24"

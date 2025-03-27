@@ -1,0 +1,77 @@
+
+configure_opnsense_dhcp_relay:
+  destinations:
+    - server: 10.0.7.10
+      name: tech
+    - server: 10.0.7.11
+      name: tech2
+  relays:
+    - enabled: 1
+      interface: lan
+      agent_info: 0
+      destination: tech
+    - enabled: 1
+      interface: guest_wlan
+      agent_info: 0
+      destination: tech
+    - enabled: 1
+      interface: wlan
+      agent_info: 0
+      destination: tech
+    - enabled: 1
+      interface: mgmt
+      agent_info: 0
+      destination: tech
+    - enabled: 1
+      interface: lan
+      agent_info: 0
+      destination: tech2
+    - enabled: 1
+      interface: guest_wlan
+      agent_info: 0
+      destination: tech2
+    - enabled: 1
+      interface: wlan
+      agent_info: 0
+      destination: tech2
+    - enabled: 1
+      interface: mgmt
+      agent_info: 0
+      destination: tech2
+
+configure_opnsense_wireguard:
+  peers:
+    - name: ripple_phone
+      public_key: CVZZlGsrwaVRZW37f0YAcUBN/BXTN1HHZMlZI1T99nc=
+      allowed_ips:
+        - 10.0.20.0/24
+
+    - name: jens
+      public_key: DIvPceAObyD2kgxRoswruEky1EY6UKjEbi7278lqnmE=
+      endpoint: kube-api.beryjuio-home.k8s.beryju.io
+      port: 42069
+      keepalive: 5
+      allowed_ips:
+        - 0.0.0.0/0
+
+  server:
+    - name: mgmt_vpn
+      peers:
+        - ripple_phone
+      tunnel_ips:
+        - 10.0.20.1/24
+      public_key: "{{ lookup('bws_cache', 'wireguard_server_pubkey').value }}"
+      private_key: "{{ lookup('bws_cache', 'wireguard_server_prikey').value }}"
+      port: 51950
+      vip: "10.1.2.2"
+
+    - name: jens_link
+      peers:
+        - jens
+      tunnel_ips:
+        - 10.0.21.2/24
+      disable_routes: true
+      public_key: V6EKDP9qnLeTZMwLbJibbzO03NZL4LxSBEjIe7ki0Ak=
+      private_key: "{{ lookup('bws_cache', 'wireguard_jens_privkey').value }}"
+      port: 42069
+      vip: "10.1.2.2"
