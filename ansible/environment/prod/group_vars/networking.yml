@@ -1,6 +1,10 @@
 update_netbox: true
 
 network_spec:
+  vpn:
+    mgmt_vpn: 10.0.20.0/24
+    jens_vpn: 10.0.21.0/24
+
   vlan:
     default:
       vlan_id: 1

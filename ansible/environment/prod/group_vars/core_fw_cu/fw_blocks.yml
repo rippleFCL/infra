@@ -113,19 +113,22 @@ configure_opnsense_rule_blocks:
       source:
         network: self
 
-  allow_wireguard:
-    - description: allow jens link
+  allow_jens_vpn:
+    - description: allow jens vpn
       action: pass
       protocol: "UDP"
       destination:
-        ip: 10.1.2.2
+        ip: self
         port: 42069
-    - description: allow mgmt link
+
+  allow_mgmt_vpn:
+    - description: allow mgmt vpn
       action: pass
       protocol: "UDP"
       destination:
-        ip: 10.1.2.2
+        ip: 10.0.3.1
         port: 51950
+
 
   allow_to_jens:
     - description: allow traffic to jens network
