@@ -34,6 +34,7 @@ configure_opnsense_rules:
       - "allow_wlan_access"
       - "allow_media"
       - "allow_services"
+      - "allow_mgmt_vpn"
       - "block_all"
     local_rule_blocks:
       allow_wlan_access:
@@ -52,6 +53,7 @@ configure_opnsense_rules:
       - "allow_internet"
       - "allow_media"
       - "allow_services"
+      - "allow_mgmt_vpn"
       - "block_all"
 
   - interface: "guest_wlan"
@@ -70,13 +72,23 @@ configure_opnsense_rules:
       - "allow_internet"
       - "allow_dnet_net"
       - "block_all"
+      - "allow_prom_scrape"
+    local_rule_blocks:
+      allow_prom_scrape:
+        - description: allow prom_scape to bws_cache-proxy
+          action: pass
+          protocol: "TCP"
+          destination:
+            port: 5000
 
   - interface: "ir_transit"
     rule_blocks:
       - "allow_icmp"
       - "allow_dns"
-      - "allow_wireguard"
+      - "allow_jens_vpn"
+      - "allow_mgmt_vpn"
       - "allow_external"
+      - "block_vpn_missroute"
       - "block_all"
     local_rule_blocks:
       allow_external:
@@ -98,6 +110,19 @@ configure_opnsense_rules:
           destination:
             ip: 10.0.7.20
             port: 5055
+      block_vpn_missroute:
+        - description: block jenslink missroute
+          action: block
+          log: true
+          direction: out
+          destination:
+            network: jens_link
+        - description: block mgmt_vpn missroute
+          action: block
+          log: true
+          direction: out
+          destination:
+            network: mgmt_vpn
 
   - interface: "jens_link"
     rule_blocks:
