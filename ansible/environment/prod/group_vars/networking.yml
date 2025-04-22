@@ -50,3 +50,6 @@ network_spec:
     fw_cluster_pfsync:
       vlan_id: 420
       network: 10.1.4.0/24
+
+    wan_vlan:
+      vlan: 1000
