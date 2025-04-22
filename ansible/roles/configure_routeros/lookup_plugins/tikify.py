@@ -101,7 +101,7 @@ class TikBridgePort:
     pvid: int = 1
     frame_types: FrameType = FrameType.admit_all
     disabled: bool = False
-    ingress_filtering: bool = False
+    ingress_filtering: bool = True
     hw: bool = True
 
 
@@ -218,6 +218,7 @@ def get_bridge_ports(
     for bridge in cfg_bridges.values():
         for port in bridge.ports:
             port_interface = get_interface(cfg_interfaces, port.interface)
+            print(port.comment)
             bridge_port = TikBridgePort(
                 bridge=bridge.interface,
                 interface=port_interface.interface,

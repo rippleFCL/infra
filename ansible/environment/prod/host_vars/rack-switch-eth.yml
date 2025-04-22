@@ -1,0 +1,69 @@
+configure_switch_interfaces:
+  rack_switch_main_uplink:
+    interface: sfp-sfpplus2
+    comment: main_switch_uplink
+  esxi_storage1_mgmt_port:
+    interface: ether1
+    comment: esxi_storage1_mgmt_port
+  esxi_storage2_mgmt_port:
+    interface: ether2
+    comment: esxi_storage2_mgmt_port
+  esxi_storage2_idrac_port:
+    interface: ether3
+    comment: esxi_storage2_idrac_port
+  pc2_mgmt_port:
+    interface: ether4
+    comment: pc2_mgmt_port
+  pc1_mgmt_port:
+    interface: ether5
+    comment: pc1_mgmt_port
+  esxi_storage1_idrac_port:
+    interface: ether6
+    comment: esxi_storage1_idrac_port
+
+
+configure_switch_bridges:
+  main_bridge:
+    interface: main_bridge
+    vlan_filtering: true
+    admin_mac: 2C:C7:1B:30:94:51
+    ports:
+      - interface: rack_switch_main_uplink
+        tagged:
+          - network_mgmt
+          - mgmt
+      - interface: esxi_storage1_mgmt_port
+        untagged: mgmt
+      - interface: esxi_storage2_mgmt_port
+        untagged: mgmt
+      - interface: esxi_storage2_idrac_port
+        untagged: mgmt
+      - interface: esxi_storage1_idrac_port
+        untagged: mgmt
+      - interface: pc2_mgmt_port
+        untagged: mgmt
+      - interface: pc1_mgmt_port
+        untagged: mgmt
+
+
+
+configure_switch_vlan_interfaces:
+  mgmt_interface:
+    bridge: main_bridge
+    vlan: network_mgmt
+    address: 10.0.2.6/24
+
+
+configure_switch_type: mikrotik
+
+ansible_connection: ansible.netcommon.network_cli
+ansible_network_cli_ssh_type: libssh
+ansible_network_os: community.routeros.routeros
+
+ansible_become: true
+ansible_become_method: enable
+ansible_host: 10.0.2.6
+
+ansible_user: admin
+ansible_password: "{{ lookup('bws_cache', 'ripple_user_password').value }}"
+
