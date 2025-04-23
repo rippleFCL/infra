@@ -14,13 +14,6 @@ resource "vsphere_tag" "opnsense" {
   description = "machines running opnsense"
 }
 
-resource "vsphere_tag" "gw-fw-cu" {
-  name        = "gw-fw-cu"
-  category_id = vsphere_tag_category.environ.id
-  description = "the internal fw cluster"
-}
-
-
 resource "vsphere_tag" "int-fw-cu" {
   name        = "core-fw-cu"
   category_id = vsphere_tag_category.environ.id

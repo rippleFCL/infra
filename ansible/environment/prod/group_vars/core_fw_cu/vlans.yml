@@ -1,6 +1,7 @@
 configure_opnsense_vlans:
+  mgmt: "{{ port_mapping.routing_trunk }}"
   lan: "{{ port_mapping.routing_trunk }}"
-  ir_transit: "{{ port_mapping.routing_trunk }}"
+  guest_lan: "{{ port_mapping.routing_trunk }}"
   fw_cluster_pfsync: "{{ port_mapping.routing_trunk }}"
   vm_network: "{{ port_mapping.routing_trunk }}"
-
+  wan_vlan: "{{ port_mapping.routing_trunk }}"

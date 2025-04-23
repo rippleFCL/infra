@@ -19,6 +19,10 @@ configure_switch_interfaces:
     interface: sfp-sfpplus4
     comment: jankvisor_desktop
 
+  ether_switch_uplink:
+    interface: sfp-sfpplus5
+    comment: ether_switch_uplink
+
 
 
 configure_switch_bridges:
@@ -32,36 +36,40 @@ configure_switch_bridges:
           - mgmt
           - network_mgmt
           - lan
-          - dmz
-          - wlan
-          - guest_wlan
+          - guest_lan
           - vm_network
           - esxi_storage
           - esxi_migration
           - vm_storage
-          - ir_transit
           - fw_cluster_pfsync
+          - wan_vlan
       - interface: esxi_storage1_uplink
         tagged:
           - mgmt
           - network_mgmt
           - lan
-          - dmz
-          - wlan
-          - guest_wlan
+          - guest_lan
           - vm_network
           - esxi_storage
           - esxi_migration
           - vm_storage
-          - ir_transit
           - fw_cluster_pfsync
-
+          - wan_vlan
       - interface: windows_uplink
         untagged: lan
       - interface: jankvisor_uplink
         tagged:
           - lan
           - network_mgmt
+          - mgmt
+          - vm_network
+      - interface: ether_switch_uplink
+        tagged:
+          - network_mgmt
+          - mgmt
+          - wan_vlan
+          - lan
+          - guest_lan
 
 configure_switch_vlan_interfaces:
   mgmt_interface:

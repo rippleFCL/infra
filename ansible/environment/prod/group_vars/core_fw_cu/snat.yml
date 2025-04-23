@@ -1,0 +1,21 @@
+configure_opnsense_snat:
+  - description: lan snat
+    target: bt_wan
+    interface: bt_wan
+    source_net: "{{ network_spec['vlan']['lan']['network'] }}"
+
+  - description: vm_network snat
+    target: bt_wan
+    interface: bt_wan
+    source_net: "{{ network_spec['vlan']['vm_network']['network'] }}"
+
+  - description: guest_wlan snat
+    target: bt_wan
+    interface: bt_wan
+    source_net: "{{ network_spec['vlan']['guest_lan']['network'] }}"
+
+  - description: mgmt snat
+    target: bt_wan
+    interface: bt_wan
+    source_net: "{{ network_spec['vlan']['mgmt']['network'] }}"
+

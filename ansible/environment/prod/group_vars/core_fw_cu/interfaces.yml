@@ -6,39 +6,32 @@ configure_opnsense_interfaces:
     config:
       if: "{{ port_mapping.network_mgmt }}"
 
-  mgmt:
-    identifier: opt9
-    vlan: mgmt
+  bt_wan:
+    identifier: opt1
+    vlan: wan_vlan
     config:
-      if: "{{ port_mapping.mgmt }}"
+      subnet: "24"
+      blockbogons: "1"
+
+  mgmt:
+    identifier: opt2
+    vlan: mgmt
 
   lan:
-    identifier: opt1
+    identifier: opt3
     vlan: lan
 
-  wlan:
-    identifier: opt2
-    vlan: wlan
-    config:
-      if: "{{ port_mapping.wifi }}"
-
-  guest_wlan:
-    identifier: opt3
-    vlan: guest_wlan
-    config:
-      if: "{{ port_mapping.guest_wifi }}"
-
-  ir_transit:
+  guest_lan:
     identifier: opt4
-    vlan: ir_transit
-
-  fw_cluster_pfsync:
-    identifier: opt5
-    vlan: fw_cluster_pfsync
+    vlan: guest_lan
 
   vm_network:
-    identifier: opt6
+    identifier: opt5
     vlan: vm_network
+
+  fw_cluster_pfsync:
+    identifier: opt6
+    vlan: fw_cluster_pfsync
 
   mgmt_vpn:
     identifier: opt7

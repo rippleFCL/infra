@@ -18,21 +18,12 @@ locals {
       }
       zone        = gravity_dns_zone.ripplefcl_com.id
     }
-    wlan       = {
-      subnet_cidr = "10.0.5.0/24"
-      start       = "10.0.5.100"
-      end         = "10.0.5.254"
+    guest_lan       = {
+      subnet_cidr = "10.0.4.0/24"
+      start       = "10.0.4.100"
+      end         = "10.0.4.254"
       options      = {
-        router = "10.0.5.1"
-      }
-      zone        = gravity_dns_zone.ripplefcl_com.id
-    }
-    guest_wlan       = {
-      subnet_cidr = "10.0.6.0/24"
-      start       = "10.0.6.100"
-      end         = "10.0.6.254"
-      options      = {
-        router = "10.0.6.1"
+        router = "10.0.4.1"
       }
       zone        = gravity_dns_zone.ripplefcl_com.id
     }
