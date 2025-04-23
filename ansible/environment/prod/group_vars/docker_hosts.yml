@@ -10,6 +10,15 @@ app_base_dir: /mnt/docking_data/
 deploy_docker_service_definitions:
   plex_stack:
     services:
+      tautulli:
+        image: ghcr.io/home-operations/tautulli:2.15.2
+        container_name: tautulli
+        user: 1100:1100
+        ports:
+          - 8181:8181
+        volumes:
+          - /mnt/docking_data/tautulli:/config
+        restart: unless-stopped
       plex:
         image:  lscr.io/linuxserver/plex:1.41.5
         container_name: plex
