@@ -31,32 +31,13 @@ configure_opnsense_rules:
       - "allow_dhcp"
       - "allow_dns"
       - "allow_internet"
-      - "allow_wlan_access"
-      - "allow_media"
-      - "allow_services"
-      - "allow_mgmt_vpn"
-      - "block_all"
-    local_rule_blocks:
-      allow_wlan_access:
-        - description: "allow wlan"
-          action: pass
-          source:
-            network: lan
-          destination:
-            network: wlan
-
-  - interface: "wlan"
-    rule_blocks:
-      - "allow_to_jens"
-      - allow_dhcp
-      - "allow_dns"
-      - "allow_internet"
       - "allow_media"
       - "allow_services"
       - "allow_mgmt_vpn"
       - "block_all"
 
-  - interface: "guest_wlan"
+
+  - interface: "guest_lan"
     rule_blocks:
       - "allow_dhcp"
       - "allow_dns"
@@ -81,55 +62,11 @@ configure_opnsense_rules:
           destination:
             port: 5000
 
-  - interface: "ir_transit"
-    rule_blocks:
-      - "allow_icmp"
-      - "allow_dns"
-      - "allow_jens_vpn"
-      - "allow_mgmt_vpn"
-      - "allow_external"
-      - "block_vpn_missroute"
-      - "block_all"
-    local_rule_blocks:
-      allow_external:
-        - description: allow plex external
-          action: pass
-          protocol: "TCP"
-          destination:
-            ip: 10.0.7.20
-            port: 32400
-        - description: allow nginx-ping external
-          action: pass
-          protocol: "TCP"
-          destination:
-            ip: 10.0.7.21
-            port: 80
-        - description: allow overseerr external
-          action: pass
-          protocol: "TCP"
-          destination:
-            ip: 10.0.7.20
-            port: 5055
-      block_vpn_missroute:
-        - description: block jenslink missroute
-          action: block
-          log: true
-          direction: out
-          destination:
-            network: jens_link
-        - description: block mgmt_vpn missroute
-          action: block
-          log: true
-          direction: out
-          destination:
-            network: mgmt_vpn
-
   - interface: "jens_link"
     rule_blocks:
       - "allow_icmp"
       - "allow_jens"
       - "block_all"
-
 
     local_rule_blocks:
       allow_jens:
@@ -142,4 +79,34 @@ configure_opnsense_rules:
           action: "pass"
           source:
             alias: jens_ip_space
+
+  - interface: bt_wan
+    rule_blocks:
+      # - "block_private_out"
+      - "allow_icmp"
+      - "block_all"
+
+    local_rule_blocks:
+      block_private_out:
+        - description: "allow double nat outer network"
+          direction: out
+          action: "pass"
+          source:
+            alias: private_ips
+          destination:
+            network: 192.168.1.0/24
+        - description: "allow double nat network"
+          direction: out
+          action: "pass"
+          source:
+            network: 192.168.1.0/24
+          destination:
+            alias: private_ips
+            invert: true
+        - description: "block private ips"
+          log: true
+          direction: "out"
+          action: "block"
+          source:
+            alias: private_ips
 

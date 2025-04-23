@@ -11,11 +11,7 @@ configure_opnsense_dhcp_relay:
       agent_info: 0
       destination: tech
     - enabled: 1
-      interface: guest_wlan
-      agent_info: 0
-      destination: tech
-    - enabled: 1
-      interface: wlan
+      interface: guest_lan
       agent_info: 0
       destination: tech
     - enabled: 1
@@ -27,11 +23,7 @@ configure_opnsense_dhcp_relay:
       agent_info: 0
       destination: tech2
     - enabled: 1
-      interface: guest_wlan
-      agent_info: 0
-      destination: tech2
-    - enabled: 1
-      interface: wlan
+      interface: guest_lan
       agent_info: 0
       destination: tech2
     - enabled: 1
@@ -81,7 +73,7 @@ configure_opnsense_wireguard:
       public_key: khILSbosdXpwJq9hAvO+yr0l/NiLnf3UKgPaVWUW3gE=
       private_key: "{{ lookup('bws_cache', 'wireguard_server_prikey').value }}"
       port: 51950
-      vip: "10.1.2.2"
+      vip: "192.168.1.10"
 
     - name: jens_link
       peers:
@@ -92,4 +84,4 @@ configure_opnsense_wireguard:
       public_key: V6EKDP9qnLeTZMwLbJibbzO03NZL4LxSBEjIe7ki0Ak=
       private_key: "{{ lookup('bws_cache', 'wireguard_jens_privkey').value }}"
       port: 42069
-      vip: "10.1.2.2"
+      vip: "192.168.1.10"

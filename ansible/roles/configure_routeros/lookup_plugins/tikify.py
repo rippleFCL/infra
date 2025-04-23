@@ -51,7 +51,6 @@ class VlanMembership(BaseModel):
 class BridgePort(VlanMembership):
     interface: str
     disabled: bool = False
-    comment: str = ""
     ingress_filtering: bool = True
     hw: bool = True
 
@@ -218,11 +217,10 @@ def get_bridge_ports(
     for bridge in cfg_bridges.values():
         for port in bridge.ports:
             port_interface = get_interface(cfg_interfaces, port.interface)
-            print(port.comment)
             bridge_port = TikBridgePort(
                 bridge=bridge.interface,
                 interface=port_interface.interface,
-                comment=port.comment,
+                comment=port_interface.comment,
                 disabled=port.disabled,
                 hw=port.hw,
                 ingress_filtering=port.ingress_filtering,
@@ -326,7 +324,6 @@ class LookupModule(LookupBase):
             cfg_bridges: dict[str, Any] = templar.template(variables[bridges_var])
             cfg_vlans: dict[str, Any] = templar.template(variables[vlans_var])
             cfg_network_info: dict[str, Any] = templar.template(variables[networking_info_var]).get("vlan", {})
-
         except Exception as exc:
             raise AnsibleLookupError(f"Error accessing or templating config variables '{exc}'") from exc
         interfaces = validate_model(InterfaceConfig, cfg_interfaces, interfaces_var)

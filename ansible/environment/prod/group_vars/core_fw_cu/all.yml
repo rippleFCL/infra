@@ -1,11 +1,9 @@
 internal_domain: int.ripplefcl.com
 
 port_mapping:
-  network_mgmt: vmx1
-  mgmt: vmx2
-  routing_trunk: vmx3
-  wifi: vmx4
-  guest_wifi: vmx0
+  network_mgmt: vmx0
+  routing_trunk: vmx1
+
 
 
 configure_opnsense_general_settings:

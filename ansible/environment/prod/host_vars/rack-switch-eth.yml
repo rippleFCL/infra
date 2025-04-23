@@ -20,7 +20,15 @@ configure_switch_interfaces:
   esxi_storage1_idrac_port:
     interface: ether6
     comment: esxi_storage1_idrac_port
-
+  wan1:
+    interface: ether10
+    comment: wan1
+  wan2:
+    interface: ether11
+    comment: wan2
+  unifi_ap:
+    interface: ether12
+    comment: unifi_ap
 
 configure_switch_bridges:
   main_bridge:
@@ -32,6 +40,9 @@ configure_switch_bridges:
         tagged:
           - network_mgmt
           - mgmt
+          - wan_vlan
+          - lan
+          - guest_lan
       - interface: esxi_storage1_mgmt_port
         untagged: mgmt
       - interface: esxi_storage2_mgmt_port
@@ -44,7 +55,12 @@ configure_switch_bridges:
         untagged: mgmt
       - interface: pc1_mgmt_port
         untagged: mgmt
-
+      - interface: unifi_ap
+        untagged: lan
+        tagged:
+          - guest_lan
+      - interface: wan1
+        untagged: wan_vlan
 
 
 configure_switch_vlan_interfaces:

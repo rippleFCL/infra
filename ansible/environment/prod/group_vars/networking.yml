@@ -18,15 +18,9 @@ network_spec:
     lan:
       vlan_id: 30
       network: 10.0.3.0/24
-    dmz:
+    guest_lan:
       vlan_id: 40
       network: 10.0.4.0/24
-    wlan:
-      vlan_id: 50
-      network: 10.0.5.0/24
-    guest_wlan:
-      vlan_id: 60
-      network: 10.0.6.0/24
     vm_network:
       vlan_id: 70
       network: 10.0.7.0/24
@@ -43,13 +37,11 @@ network_spec:
       network: 10.2.3.0/24
 
     # transits
-    ir_transit:
-      vlan_id: 400
-      network: 10.1.2.0/24
-
     fw_cluster_pfsync:
       vlan_id: 420
       network: 10.1.4.0/24
 
+    # WANS
     wan_vlan:
-      vlan: 1000
+      vlan_id: 1000
+      network: 192.168.1.0/24

@@ -22,7 +22,7 @@ class FilterModule:
             compiled_interface["config"]["enable"] = "1"
 
             compiled_interface["config"].update(interface.get("config", {}))
-
+            print(compiled_interface)
             if "vlan" in interface:
                 vlan_info = network_conf["vlan"][interface["vlan"]]
                 try:
@@ -37,10 +37,13 @@ class FilterModule:
                 if "if" not in compiled_interface["config"]:
                     compiled_interface["config"]["if"] = f"vlan0.{vlan_id}"
                 ip_network = ipaddress.ip_network(network)
-                ip_address = ipaddress.ip_address(compiled_interface["config"]["ipaddr"])
+                try:
+                    ip_address = ipaddress.ip_address(compiled_interface["config"]["ipaddr"])
+                except KeyError:
+                    raise AnsibleFilterError(f"ipaddr not found for interface {interface_name}")
                 if ip_address not in ip_network:
                     raise AnsibleFilterError(
-                        f"interface {compiled_interface['identifier']} ipaddr {compiled_interface['config']['ipaddr']} not in vlan {interface["vlan"]}'s network: {vlan_info['network']}"
+                        f"interface {interface_name} ipaddr {compiled_interface['config']['ipaddr']} not in vlan {interface["vlan"]}'s network: {vlan_info['network']}"
                     )
                 if "subnet" not in compiled_interface["config"]:
                     compiled_interface["config"]["subnet"] = str(ip_network.prefixlen)

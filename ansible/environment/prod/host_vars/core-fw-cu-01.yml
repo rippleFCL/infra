@@ -26,13 +26,11 @@ configure_opnsense_interfaces_overrides:
     ipaddr: "10.0.2.1"
   lan:
     ipaddr: "10.0.3.2"
-  wlan:
-    ipaddr: "10.0.5.2"
-  guest_wlan:
-    ipaddr: "10.0.6.2"
+  guest_lan:
+    ipaddr: "10.0.4.2"
   vm_network:
     ipaddr: "10.0.7.2"
-  ir_transit:
-    ipaddr: "10.1.2.3"
   fw_cluster_pfsync:
     ipaddr: "10.1.4.1"
+  bt_wan:
+    ipaddr: "192.168.1.9"
