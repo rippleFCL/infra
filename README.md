@@ -79,7 +79,7 @@ terraform apply
 - `the-cows/`: Miscellaneous scripts and tools.
 - `.vscode/`: Visual Studio Code settings.
 - `pyproject.toml`: Python project configuration.
-- `poetry.lock`: Poetry lock file for dependencies. ([Automate Terraform Modules README Generation with terraform ...](https://skundunotes.com/2025/01/10/automate-terraform-modules-readme-generation-with-terraform-docs-and-github-actions/?utm_source=chatgpt.com))
+- `poetry.lock`: Poetry lock file for dependencies.
 
 ## Contributing
 
