@@ -57,7 +57,7 @@ Navigate to the `packer` directory and build images:
 
 ```bash
 cd packer
-packer build template.json
+packer build template
 ```
 
 ### Terraform
