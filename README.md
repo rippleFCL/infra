@@ -65,7 +65,7 @@ packer build template
 Navigate to the `terraform` directory and apply configurations:
 
 ```bash
-cd terraform
+cd terraform/project
 terraform init
 terraform apply
 ```
