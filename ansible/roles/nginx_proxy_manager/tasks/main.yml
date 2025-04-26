@@ -1,0 +1,105 @@
+---
+- name: Make data directories
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    mode: '0755'
+  loop:
+    - "{{ nginx_proxy_dir }}"
+    - "{{ nginx_proxy_conf_dir }}"
+    - "{{ nginx_proxy_html_dir }}"
+    - "{{ nginx_proxy_snippets_dir }}"
+    - "{{ nginx_proxy_certbot_dir }}"
+    - "{{ nginx_proxy_ssl_dir }}"
+
+- name: Template certbot credentials files
+  ansible.builtin.template:
+    src: certbot/cloudflare.ini.j2
+    dest: "{{ [nginx_proxy_certbot_dir, 'cloudflare.ini'] | path_join }}"
+    mode: '0600'
+    group: root
+    owner: root
+
+- name: Generate Diffie-Hellman parameters (dhparam)
+  community.crypto.openssl_dhparam:
+    path: "{{ [nginx_proxy_ssl_dir, 'dhparam.pem'] | path_join }}"
+    mode: "0644"
+    owner: root
+    group: root
+    state: present
+
+- name: Template snippets
+  ansible.builtin.template:
+    src: "{{ [item.root, item.path] | path_join }}"
+    dest: "{{ [nginx_proxy_snippets_dir, item.path | replace('.j2', '')] | path_join }}"
+    force: true
+    owner: root
+    group: root
+    mode: "0644"
+  loop: >-
+    {{ lookup('filetree', (nginx_proxy_snippets_src_path), wantlist=true) }}
+  loop_control:
+    label: "{{ item.path }}"
+  when:
+    - item.state == 'file'
+    - item.path | regex_search('.j2$')
+  notify: Reload nginx container
+
+- name: Template configs
+  ansible.builtin.template:
+    src: "{{ [item.root, item.path] | path_join }}"
+    dest: "{{ [ nginx_proxy_conf_dir, item.path | replace('.j2', '')] | path_join }}"
+    force: true
+    owner: root
+    group: root
+    mode: '0644'
+  loop: >-
+    {{ lookup('filetree', (nginx_proxy_conf_src_path), wantlist=true) }}
+  loop_control:
+    label: "{{ item.path }}"
+  when:
+    - item.state == 'file'
+    - item.path | regex_search('.j2$')
+  notify: Reload nginx container
+
+- name: Copy nginx html files
+  ansible.builtin.copy:
+    src: html
+    dest: "{{ nginx_proxy_html_dir }}"
+    owner: ripple
+    group: ripple
+    mode: "0644"
+  notify: Reload nginx container
+
+- name: Copy nginx snippets files
+  ansible.builtin.copy:
+    src: snippets/
+    dest: "{{ nginx_proxy_snippets_dir }}"
+    owner: ripple
+    group: ripple
+    mode: "0644"
+  notify: Reload nginx container
+
+- name: Find all NGINX configs
+  ansible.builtin.find:
+    paths: "{{ nginx_proxy_conf_dir }}"
+    recurse: true
+  register: find_confs
+
+- name: Remove undefined configs
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: absent
+  loop: "{{ find_confs.files }}"
+  loop_control:
+    label: "{{ item.path }}"
+  when: >-
+    item.path | split(nginx_proxy_conf_dir+'/') | last not in lookup('filetree', nginx_proxy_conf_src_path, wantlist=true) |
+      selectattr('state', 'equalto', 'file') | map(attribute='path') | map('replace', '.j2', '')
+  notify: Reload nginx container
+
+- name: Create docker stack
+  community.docker.docker_compose_v2:
+    project_name: nginx_proxy
+    definition: "{{ nginx_proxy_stack }}"
+
