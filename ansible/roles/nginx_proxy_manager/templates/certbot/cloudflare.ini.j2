@@ -1,0 +1,4 @@
+{{ ansible_managed | comment }}
+
+# Cloudflare API token used by Certbot
+dns_cloudflare_api_token = "{{ lookup('bws_cache', 'cloudflare_api_token').value }}"
