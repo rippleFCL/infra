@@ -1,0 +1,86 @@
+- name: Install Deb dependencies for mainsail plugins
+  ansible.builtin.apt:
+    name:
+      - "git"
+      - "make"
+      - "python3-venv"
+      - "python3-pip"
+      - "python3-dev"
+    state: present
+
+- name: Install dependencies
+  ansible.builtin.pip:
+    name:
+      - "pexpect"
+    break_system_packages: true
+    state: present
+
+- name: Clone mainsail config repository
+  ansible.builtin.git:
+    repo: "{{ configure_mainsail_config_repo }}"
+    dest: "{{ configure_mainsail_config_repo_dir }}"
+    version: master
+    force: true
+  become: true
+  become_user: "{{ configure_mainsail_user }}"
+
+- name: Link mainsail.cfg
+  ansible.builtin.file:
+    src: "{{ configure_mainsail_config_repo_dir }}/mainsail.cfg"
+    dest: "{{ configure_mainsail_config_dir }}/mainsail.cfg"
+    state: link
+
+- name: Clone mainsail timelapse repository
+  ansible.builtin.git:
+    repo: "{{ configure_mainsail_timelapse_repo }}"
+    dest: "{{ configure_mainsail_timelapse_repo_dir }}"
+    version: main
+    force: true
+  become: true
+  become_user: "{{ configure_mainsail_user }}"
+
+- name: Run timelapse 'install' target
+  ansible.builtin.expect:
+    chdir: "{{ configure_mainsail_timelapse_repo_dir }}"
+    command: make install
+    responses:
+      '.*Would you like to.*': "Y"
+  become: true
+  become_user: "{{ configure_mainsail_user }}"
+
+- name: Clone mainsail crowsnest repository
+  ansible.builtin.git:
+    repo: "{{ configure_mainsail_crowsnest_repo }}"
+    dest: "{{ configure_mainsail_crowsnest_repo_dir }}"
+    version: master
+    force: true
+  become: true
+  become_user: "{{ configure_mainsail_user }}"
+  notify:
+    - Reboot
+
+- name: Run crowsnest 'install' target
+  ansible.builtin.expect:
+    chdir: "{{ configure_mainsail_crowsnest_repo_dir }}"
+    command: sudo make install
+    responses:
+      '.*Do you want to add.*': "\bn"
+      '.*Reboot NOW.*': "\bN"
+  become: true
+  become_user: "{{ configure_mainsail_user }}"
+
+- name: Clone KAMP repository
+  ansible.builtin.git:
+    repo: "{{ configure_mainsail_kamp_repo }}"
+    dest: "{{ configure_mainsail_kamp_repo_dir }}"
+    version: main
+    force: true
+  become: true
+  become_user: "{{ configure_mainsail_user }}"
+
+- name: Link KAMP configuration directory
+  ansible.builtin.file:
+    src: "{{ configure_mainsail_kamp_repo_dir }}/Configuration"
+    dest: "{{ configure_mainsail_config_dir }}/KAMP"
+    state: link
+

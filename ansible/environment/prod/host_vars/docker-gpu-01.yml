@@ -6,10 +6,15 @@ setup_users_secondary:
 mount_nfs_shares:
   - path: /mnt/plex_media
     share: 10.2.3.1:/hdd-pool/hdd-nas/plex_media/nfs
-    opts: rw,async,hard,nofail,_netdev
+    opts: rw,async,hard,intr,nofail,_netdev
   - path: /mnt/download_pool
     share: 10.2.3.2:/big-ssd-pool/ssd-nas/download/
+    opts: rw,async,hard,intr,nofail,_netdev
+  - path: /mnt/immich_data
+    share: 10.2.3.1:/hdd-pool/hdd-nas/immich_data
     opts: rw,async,hard,nofail,_netdev
+
+deploy_immich_image_dir: /mnt/immich_data/
 
 nmcli_interfaces:
   - name: ens192
@@ -25,6 +30,9 @@ nmcli_interfaces:
 deploy_docker_services:
   - plex_stack
   - wakapi
+
+deploy_docker_roles:
+  - deploy_immich
 
 install_container_toolkit: true
 nvidia_drivers_install: true

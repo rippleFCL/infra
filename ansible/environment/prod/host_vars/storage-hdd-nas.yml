@@ -53,6 +53,18 @@ zfs_fs_config:
               owner: plex
               group: plex
               recurse: true
+      - name: "immich_data"
+        mountpoint:
+          owner: 1000
+          group: 1000
+      - name: "immich_data"
+        mountpoint:
+          owner: 1000
+          group: 1000
+      - name: "mac_data"
+        mountpoint:
+          owner: 501
+          group: 20
 
 
 zfs_performance_tuning:
@@ -74,6 +86,9 @@ nfs_exports:
   - "/hdd-pool/hdd-nas/vcenter/nfs/ *(rw,sync,no_root_squash)"
   - "/hdd-pool/hdd-nas/veeam/nfs/ *(rw,sync,no_root_squash)"
   - "/hdd-pool/hdd-nas/plex_media/nfs/ *(rw)"
+  - "/hdd-pool/hdd-nas/immich_data *(rw,no_root_squash)"
+  - "/hdd-pool/hdd-nas/mac_data *(rw,no_root_squash)"
+
 
 nmcli_interfaces:
   - name: ens192

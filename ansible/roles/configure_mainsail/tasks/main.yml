@@ -1,0 +1,17 @@
+- name: Install mainsail plugins
+  ansible.builtin.include_tasks:
+    file: install_plugins.yml
+
+- name: Copy configuration files to mainsail config directory
+  ansible.builtin.copy:
+    src: files/config/
+    dest: "{{ configure_mainsail_config_dir }}/"
+    owner: "{{ configure_mainsail_user }}"
+    group: "{{ configure_mainsail_group }}"
+    mode: '0644'
+  notify:
+    - Restart klipper
+    - Restart moonraker
+  become: true
+  tags:
+    - config

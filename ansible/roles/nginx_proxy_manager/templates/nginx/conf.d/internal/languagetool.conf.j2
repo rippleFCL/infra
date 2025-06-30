@@ -1,0 +1,26 @@
+{{ ansible_managed | comment }}
+
+server {
+  listen 8080;
+  server_name languagetool.ripplefcl.com;
+  return 301 https://$host$request_uri;
+}
+
+server {
+  listen 8443 ssl;
+  listen [::]:8443 ssl;
+
+  server_name languagetool.ripplefcl.com;
+  client_max_body_size 0;
+
+  ssl_certificate /etc/letsencrypt/live/ripplefcl.com/fullchain.pem;
+  ssl_certificate_key /etc/letsencrypt/live/ripplefcl.com/privkey.pem;
+  include /etc/nginx/snippets/ssl-defaults.conf;
+
+  location / {
+    # include /etc/nginx/snippets/ssl-defaults.conf;
+    include /etc/nginx/snippets/proxy-defaults.conf;
+    include /etc/nginx/snippets/websocket-headers.conf;
+    proxy_pass http://10.0.7.21:8020;
+  }
+}

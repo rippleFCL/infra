@@ -1,0 +1,68 @@
+---
+- name: Ensure git is installed
+  ansible.builtin.apt:
+    name: git
+    state: present
+
+- name: Debug user and directory information
+  ansible.builtin.debug:
+    msg: "{{ mainsail_user }} {{ mainsail_klipper_dir }}"
+
+- name: Clone Klipper repository
+  ansible.builtin.git:
+    repo: "{{ mainsail_klipper_repo }}"
+    dest: "{{ mainsail_klipper_dir }}"
+    version: master
+    force: true
+  become: true
+  become_user: "{{ mainsail_user }}"
+
+- name: Create Klipper Python virtual environment
+  ansible.builtin.pip:
+    requirements: "{{ mainsail_klipper_dir }}/scripts/klippy-requirements.txt"
+    virtualenv: "{{ mainsail_klipper_venv }}"
+    virtualenv_python: python3
+  become: true
+  become_user: "{{ mainsail_user }}"
+
+- name: Create Klipper systemd service file
+  ansible.builtin.template:
+    src: klipper.service.j2
+    dest: /etc/systemd/system/klipper.service
+    owner: root
+    group: root
+    mode: '0644'
+  notify:
+    - Reload systemd
+
+- name: Create Klipper directories
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    owner: "{{ mainsail_user }}"
+    group: "{{ mainsail_group }}"
+    mode: '0755'
+    recurse: true
+  loop:
+    - "{{ mainsail_klipper_dir }}"
+    - "{{ mainsail_printer_data_dir }}"
+    - "{{ mainsail_printer_config_dir }}"
+    - "{{ mainsail_printer_logs_dir }}"
+    - "{{ mainsail_printer_gcodes_dir }}"
+    - "{{ mainsail_printer_systemd_dir }}"
+    - "{{ mainsail_printer_comms_dir }}"
+
+- name: Create Klipper environment file
+  ansible.builtin.template:
+    src: klipper.env.j2
+    dest: "{{ mainsail_printer_systemd_dir }}/klipper.env"
+    owner: "{{ mainsail_user }}"
+    group: "{{ mainsail_group }}"
+    mode: '0644'
+
+- name: Enable and start Klipper service
+  ansible.builtin.systemd:
+    name: klipper
+    enabled: true
+    state: started
+    daemon_reload: true

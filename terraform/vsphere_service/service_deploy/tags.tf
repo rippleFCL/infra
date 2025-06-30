@@ -41,6 +41,19 @@ resource "vsphere_tag" "docker-host" {
   description = "machines running debian"
 }
 
+resource "vsphere_tag" "mainsail-host" {
+  name        = "mainsail-hosts"
+  category_id = vsphere_tag_category.environ.id
+  description = "machines running debian-mainsail"
+}
+
+resource "vsphere_tag" "proxy-hosts" {
+  name        = "proxy-hosts"
+  category_id = vsphere_tag_category.environ.id
+  description = "machines running debian"
+}
+
+
 resource "vsphere_tag" "docker-gpu-host" {
   name        = "docker-gpu-hosts"
   category_id = vsphere_tag_category.environ.id

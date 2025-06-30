@@ -1,0 +1,3 @@
+nginx_proxy_services: []
+
+nginx_proxy_deploy_context: default

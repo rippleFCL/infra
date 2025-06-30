@@ -1,0 +1,57 @@
+---
+- name: Create printer data directories
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    owner: "{{ mainsail_user }}"
+    group: "{{ mainsail_group }}"
+    mode: '0755'
+  loop:
+    - "{{ mainsail_printer_data_dir }}"
+    - "{{ mainsail_printer_config_dir }}"
+    - "{{ mainsail_printer_logs_dir }}"
+    - "{{ mainsail_printer_gcodes_dir }}"
+    - "{{ mainsail_printer_systemd_dir }}"
+    - "{{ mainsail_printer_comms_dir }}"
+
+- name: Create Mainsail directory
+  ansible.builtin.file:
+    path: "{{ mainsail_dir }}"
+    state: directory
+    owner: "{{ mainsail_user }}"
+    group: "{{ mainsail_group }}"
+    mode: '0755'
+
+- name: Create empty printer.cfg file
+  ansible.builtin.file:
+    path: "{{ mainsail_printer_config_dir }}/printer.cfg"
+    state: touch
+    owner: "{{ mainsail_user }}"
+    group: "{{ mainsail_group }}"
+    mode: '0644'
+
+- name: Add www-data user to user group (Debian 12 requirement)
+  ansible.builtin.user:
+    name: www-data
+    groups: "{{ mainsail_group }}"
+    append: true
+
+- name: Set executable permissions on user home directory
+  ansible.builtin.file:
+    path: "{{ mainsail_home }}"
+    mode: g+x
+
+- name: Download and extract Mainsail
+  ansible.builtin.unarchive:
+    src: "{{ mainsail_download_url }}"
+    dest: "{{ mainsail_dir }}"
+    remote_src: true
+    owner: "{{ mainsail_user }}"
+    group: "{{ mainsail_group }}"
+
+- name: Enable and start avahi-daemon service
+  ansible.builtin.systemd:
+    name: avahi-daemon
+    enabled: true
+    state: started
+  when: mainsail_install_avahi | bool

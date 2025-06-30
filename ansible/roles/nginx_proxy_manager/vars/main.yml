@@ -1,0 +1,45 @@
+nginx_proxy_dir: "{{ [app_base_dir, 'nginx_proxy'] | path_join }}"
+nginx_proxy_conf_dir: "{{ [nginx_proxy_dir, 'conf'] | path_join }}"
+nginx_proxy_html_dir: "{{ [nginx_proxy_dir, 'html'] | path_join }}"
+nginx_proxy_snippets_dir: "{{ [nginx_proxy_dir, 'snippets'] | path_join }}"
+nginx_proxy_certbot_dir: "{{ [nginx_proxy_dir, 'certbot'] | path_join }}"
+nginx_proxy_ssl_dir: "{{ [nginx_proxy_dir, 'ssl'] | path_join }}"
+
+nginx_proxy_conf_src_path: "{{ [role_path, 'templates/nginx/conf.d', nginx_proxy_deploy_context] | path_join }}"
+nginx_proxy_snippets_src_path: "{{ [role_path, 'templates/nginx/snippets'] | path_join}}"
+
+nginx_proxy_stack:
+  services:
+    nginx:
+      image: nginx:1.28.0
+      container_name: nginx
+      restart: unless-stopped
+      ports:
+        - 80:8080
+        - 443:8443
+      volumes:
+        - "{{ nginx_proxy_html_dir }}:/usr/share/nginx/html/"
+        - "{{ nginx_proxy_conf_dir }}:/etc/nginx/conf.d/"
+        - "{{ nginx_proxy_snippets_dir }}:/etc/nginx/snippets"
+        - "{{ nginx_proxy_ssl_dir }}:/etc/letsencrypt"
+
+    certbot:
+      container_name: certbot
+      image: certbot/dns-cloudflare:v4.0.0
+      volumes:
+        - "{{ nginx_proxy_ssl_dir }}:/etc/letsencrypt"
+        - "{{ nginx_proxy_certbot_dir }}:/root/cloudflare"
+      command: >
+          certonly
+          --dns-cloudflare
+          --dns-cloudflare-credentials /root/cloudflare/cloudflare.ini
+          --dns-cloudflare-propagation-seconds 20
+          --email {{ lookup('bws_cache', 'letsencrypt_email').value }}
+          --agree-tos
+          --no-eff-email
+          --force-renewal
+          {% for domain in nginx_proxy_domains %}
+            -d *.{{ domain }}
+            -d {{ domain }}
+          {% endfor %}
+

@@ -1,0 +1,49 @@
+---
+# Default variables for Mainsail installation
+
+mainsail_home: "/home/{{ mainsail_user }}"
+
+# Klipper configuration
+mainsail_klipper_repo: "https://github.com/Klipper3d/klipper"
+mainsail_klipper_dir: "{{ mainsail_home }}/klipper"
+mainsail_klipper_venv: "{{ mainsail_home }}/klippy-env"
+
+# Moonraker configuration
+mainsail_moonraker_repo: "https://github.com/Arksine/moonraker.git"
+mainsail_moonraker_dir: "{{ mainsail_home }}/moonraker"
+mainsail_moonraker_venv: "{{ mainsail_home }}/moonraker-env"
+
+# Printer data directories
+mainsail_printer_data_dir: "{{ mainsail_home }}/printer_data"
+mainsail_printer_config_dir: "{{ mainsail_printer_data_dir }}/config"
+mainsail_printer_logs_dir: "{{ mainsail_printer_data_dir }}/logs"
+mainsail_printer_gcodes_dir: "{{ mainsail_printer_data_dir }}/gcodes"
+mainsail_printer_systemd_dir: "{{ mainsail_printer_data_dir }}/systemd"
+mainsail_printer_comms_dir: "{{ mainsail_printer_data_dir }}/comms"
+
+# Mainsail configuration
+mainsail_dir: "{{ mainsail_home }}/mainsail"
+mainsail_download_url: "https://github.com/mainsail-crew/mainsail/releases/latest/download/mainsail.zip"
+
+# Network configuration
+mainsail_moonraker_port: 7125
+mainsail_nginx_port: 80
+
+# Trusted clients for Moonraker (modify as needed)
+mainsail_moonraker_trusted_clients:
+  - "10.0.0.0/8"
+  - "127.0.0.0/8"
+  - "169.254.0.0/16"
+  - "172.16.0.0/12"
+  - "192.168.0.0/16"
+  - "FE80::/10"
+  - "::1/128"
+
+# CORS domains for Moonraker
+mainsail_moonraker_cors_domains:
+  - "*://{{ mainsail_fqdn }}"
+  - "*://*.local"
+  - "*://*.lan"
+
+# Optional: Install avahi-daemon for hostname resolution
+mainsail_install_avahi: true

@@ -1,0 +1,14 @@
+---
+- name: Prune Docker images
+  community.docker.docker_prune:
+    images: true
+    images_filters:
+      dangling: false
+
+
+- name: Reload nginx container
+  community.docker.docker_compose_v2:
+    project_name: nginx_proxy
+    definition: "{{ nginx_proxy_stack }}"
+    remove_orphans: true
+    state: restarted

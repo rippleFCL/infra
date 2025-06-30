@@ -20,7 +20,7 @@ deploy_docker_service_definitions:
           - /mnt/docking_data/tautulli:/config
         restart: unless-stopped
       plex:
-        image:  lscr.io/linuxserver/plex:1.41.5
+        image: lscr.io/linuxserver/plex:1.41.5
         container_name: plex
         network_mode: host
         runtime: nvidia
@@ -123,7 +123,7 @@ deploy_docker_service_definitions:
   wakapi:
     services:
       wakapi:
-        image: ghcr.io/muety/wakapi:2.12.2
+        image: ghcr.io/muety/wakapi:2.13.4
         ports:
           - 3000:3000
         volumes:
@@ -135,7 +135,7 @@ deploy_docker_service_definitions:
           WAKAPI_LEADERBOARD_ENABLED: 'false'
           WAKAPI_DISABLE_FRONTPAGE: 'true'
           WAKAPI_EXPOSE_METRICS: 'true'
-          WAKAPI_PUBLIC_URL: http://waka.ripplefcl.com
+          WAKAPI_PUBLIC_URL: https://waka.ripplefcl.com
   taskin:
     services:
       taskin-api:
@@ -159,3 +159,33 @@ deploy_docker_service_definitions:
           - '3000:3000'
         volumes:
           - /mnt/docking_data/grafana:/var/lib/grafana
+  languagestuff:
+    services:
+      libretranslate:
+        image: libretranslate/libretranslate:v1.6.5
+        tty: true
+        stdin_open: true
+        ports:
+          - 5010:5000
+        environment:
+          - host=libretranslate.ripplefcl.com
+        volumes:
+          - /mnt/docking_data/libretranslate:/home/libretranslate/.local/share/argos-translate
+
+      omni-poly:
+        restart: unless-stopped
+        environment:
+          LANGUAGE_TOOL: https://languagetool.ripplefcl.com
+          LIBRETRANSLATE: https://libretranslate.ripplefcl.com
+
+          # pick one of: 'pole' | 'light' | 'dark'
+          THEME: 'dark'
+          # To limit language options for translations provide an array of ISO 639 language codes
+          LIBRETRANSLATE_LANGUAGES: "['en']" # optional
+          # To limit language options for text check provide an array of long tags (ISO 639/ISO-3166) also known as language-Region code.
+          LANGUAGE_TOOL_LANGUAGES: "['en-GB']" # optional
+          # To disable "add word" to dicationary
+          DISABLE_DICTIONARY: true # optional
+        ports:
+          - 5020:80
+        image: kweg/omnipoly:0.12.0

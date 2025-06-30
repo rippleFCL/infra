@@ -6,7 +6,7 @@
     uid: "{{ item.uid | default(omit) }}"
     shell: /bin/bash
     create_home: true
-  loop: "{{ setup_users_primary+setup_users_secondary }}"
+  loop: "{{ setup_users_primary + setup_users_secondary }}"
   loop_control:
     label: "{{ item.username }}"
 
@@ -16,8 +16,9 @@
     state: present
     user: "{{ item.username }}"
     commands: ALL
+    runas: "{{ 'ALL:ALL' if item.runas | default(false) else omit }}"
   when: "item.sudo | default(false)"
-  loop: "{{ setup_users_primary+setup_users_secondary }}"
+  loop: "{{ setup_users_primary + setup_users_secondary }}"
   loop_control:
     label: "{{ item.username }}"
 
@@ -25,7 +26,17 @@
 - name: Set users autherised ssh key
   ansible.builtin.include_tasks:
     file: setup_ssh_keys.yml
-  loop: "{{ setup_users_primary+setup_users_secondary }}"
+  loop: "{{ setup_users_primary + setup_users_secondary }}"
   loop_control:
     loop_var: "userdata"
     label: "{{ userdata.username }}"
+
+- name: 'Add users to groups'
+  ansible.builtin.user:
+    name: "{{ item.username }}"
+    groups: "{{ item.groups | default([]) }}"
+    append: true
+    state: present
+  loop: "{{ setup_users_primary + setup_users_secondary }}"
+  loop_control:
+    label: "{{ item.username }}"

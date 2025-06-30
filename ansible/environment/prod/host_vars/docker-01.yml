@@ -16,18 +16,31 @@ deploy_docker_roles:
   - rommapp
 
 deploy_docker_services:
-  - taskin
+  - languagestuff
+
+
+services:
+  postgresql:
+    image: docker.io/library/postgres:16-alpine
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -d $${POSTGRES_DB} -U $${POSTGRES_USER}"]
+      start_period: 20s
+      interval: 30s
+      retries: 5
+      timeout: 5s
 
 prometheus_scrape_configs:
   - job_name: prometheus
     static_configs:
-    - targets:
-      - localhost:9090
+      - targets:
+          - localhost:9090
   - job_name: bws_cache
     static_configs:
-    - targets:
-      - 10.0.7.21:5000
-    - targets:
-      - 10.0.20.3:5000
-    - targets:
-      - 10.0.20.5:5000
+      - targets:
+          - 10.0.7.21:5000
+      - targets:
+          - 10.0.20.3:5000
+      - targets:
+          - 10.0.20.5:5000
+

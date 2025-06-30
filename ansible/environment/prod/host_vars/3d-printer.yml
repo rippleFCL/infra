@@ -1,0 +1,4 @@
+mainsail_user: "ripple"
+mainsail_group: "{{ mainsail_user }}"
+mainsail_fqdn: "3d-printer.ripplefcl.com"
+

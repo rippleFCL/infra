@@ -1,0 +1,33 @@
+---
+# Main task file that orchestrates the Mainsail installation
+# This file includes all the individual task files in the correct order
+
+- name: Install system packages and dependencies
+  ansible.builtin.include_tasks: install_packages.yml
+  tags:
+    - packages
+    - dependencies
+
+- name: Setup Klipper 3D printer firmware
+  ansible.builtin.include_tasks: setup_klipper.yml
+  tags:
+    - klipper
+    - firmware
+
+- name: Setup Moonraker API server
+  ansible.builtin.include_tasks: setup_moonraker.yml
+  tags:
+    - moonraker
+    - api
+
+- name: Setup NGINX reverse proxy
+  ansible.builtin.include_tasks: setup_nginx.yml
+  tags:
+    - nginx
+    - web
+
+- name: Setup Mainsail web interface
+  ansible.builtin.include_tasks: setup_mainsail.yml
+  tags:
+    - mainsail
+    - web-interface

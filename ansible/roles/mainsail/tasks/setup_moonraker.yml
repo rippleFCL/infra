@@ -1,0 +1,68 @@
+---
+- name: Clone Moonraker repository
+  ansible.builtin.git:
+    repo: "{{ mainsail_moonraker_repo }}"
+    dest: "{{ mainsail_moonraker_dir }}"
+    version: master
+  become: true
+  become_user: "{{ mainsail_user }}"
+
+- name: Create Moonraker Python virtual environment
+  ansible.builtin.pip:
+    requirements: "{{ mainsail_moonraker_dir }}/scripts/moonraker-requirements.txt"
+    virtualenv: "{{ mainsail_moonraker_venv }}"
+    virtualenv_python: python3
+  become: true
+  become_user: "{{ mainsail_user }}"
+
+- name: Create Moonraker systemd service file
+  ansible.builtin.template:
+    src: moonraker.service.j2
+    dest: /etc/systemd/system/moonraker.service
+    owner: root
+    group: root
+    mode: '0644'
+  notify:
+    - Reload systemd
+
+- name: Create Moonraker environment file
+  ansible.builtin.template:
+    src: moonraker.env.j2
+    dest: "{{ mainsail_printer_systemd_dir }}/moonraker.env"
+    owner: "{{ mainsail_user }}"
+    group: "{{ mainsail_group }}"
+    mode: '0644'
+
+- name: Create Moonraker configuration file
+  ansible.builtin.template:
+    src: moonraker.conf.j2
+    dest: "{{ mainsail_printer_config_dir }}/moonraker.conf"
+    owner: "{{ mainsail_user }}"
+    group: "{{ mainsail_group }}"
+    mode: '0644'
+  notify:
+    - Restart moonraker
+
+- name: Create moonraker-admin group
+  ansible.builtin.group:
+    name: moonraker-admin
+    state: present
+
+- name: Add user to moonraker-admin group
+  ansible.builtin.user:
+    name: "{{ mainsail_user }}"
+    groups: moonraker-admin
+    append: true
+
+- name: Set PolicyKit rules for Moonraker
+  ansible.builtin.command: "{{ mainsail_moonraker_dir }}/scripts/set-policykit-rules.sh"
+  changed_when: false
+  become: true
+  become_user: "{{ mainsail_user }}"
+
+- name: Enable and start Moonraker service
+  ansible.builtin.systemd:
+    name: moonraker
+    enabled: true
+    state: started
+    daemon_reload: true

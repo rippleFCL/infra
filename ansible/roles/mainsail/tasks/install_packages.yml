@@ -1,0 +1,65 @@
+---
+- name: Update package cache and upgrade system
+  ansible.builtin.apt:
+    update_cache: true
+    upgrade: dist
+    cache_valid_time: 3600
+
+- name: Install basic required packages
+  ansible.builtin.apt:
+    name:
+      - git
+      - unzip
+      - curl
+      - wget
+    state: present
+
+- name: Install Klipper OS dependencies
+  ansible.builtin.apt:
+    name:
+      - python3-virtualenv
+      - python3-dev
+      - libffi-dev
+      - build-essential
+      - libncurses-dev
+      - avrdude
+      - gcc-avr
+      - binutils-avr
+      - avr-libc
+      - stm32flash
+      - dfu-util
+      - libnewlib-arm-none-eabi
+      - gcc-arm-none-eabi
+      - binutils-arm-none-eabi
+      - libusb-1.0-0
+      - libusb-1.0-0-dev
+    state: present
+
+- name: Install Moonraker OS dependencies
+  ansible.builtin.apt:
+    name:
+      - python3-virtualenv
+      - python3-dev
+      - libopenjp2-7
+      - python3-libgpiod
+      - curl
+      - libcurl4-openssl-dev
+      - libssl-dev
+      - liblmdb-dev
+      - libsodium-dev
+      - zlib1g-dev
+      - libjpeg-dev
+      - packagekit
+      - wireless-tools
+    state: present
+
+- name: Install NGINX
+  ansible.builtin.apt:
+    name: nginx
+    state: present
+
+- name: Install avahi-daemon for hostname resolution
+  ansible.builtin.apt:
+    name: avahi-daemon
+    state: present
+  when: mainsail_install_avahi | bool

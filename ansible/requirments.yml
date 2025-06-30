@@ -9,6 +9,8 @@ collections:
   - name: ansible.posix
   - name: community.docker
   - name: community.dns
+  - name: community.crypto
+  - name: ripplefcl.bwscache
 roles:
   - name: mrlesmithjr.zfs
   - name: geerlingguy.docker

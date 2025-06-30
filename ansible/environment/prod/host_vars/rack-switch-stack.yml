@@ -63,6 +63,7 @@ configure_switch_bridges:
           - network_mgmt
           - mgmt
           - vm_network
+          - vm_storage
       - interface: ether_switch_uplink
         tagged:
           - network_mgmt

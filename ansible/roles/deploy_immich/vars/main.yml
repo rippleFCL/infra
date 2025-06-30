@@ -1,0 +1,70 @@
+deploy_immich_data_dir: "{{ [app_base_dir, 'immich'] | path_join }}"
+deploy_immich_cache_dir: "{{ [deploy_immich_data_dir, 'cache'] | path_join }}"
+deploy_immich_database_dir: "{{ [deploy_immich_data_dir, 'database'] | path_join }}"
+deploy_immich_upload_dir: "{{ [deploy_immich_image_dir, 'upload'] | path_join }}"
+
+
+deploy_immich_stack:
+  services:
+    immich-server:
+      container_name: immich_server
+      image: ghcr.io/immich-app/immich-server:v1.132.1
+      runtime: nvidia
+      volumes:
+        # Do not edit the next line. If you want to change the media storage location on your system, edit the value of UPLOAD_LOCATION in the .env file
+        - "{{ deploy_immich_upload_dir }}:/usr/src/app/upload"
+        - /etc/localtime:/etc/localtime:ro
+      environment:
+        DB_PASSWORD: "{{ lookup('bws_cache', 'immich_postgres_pwd').value }}"
+        DB_USERNAME: postgres
+        DB_DATABASE_NAME: immich
+      ports:
+        - '2283:2283'
+      depends_on:
+        - redis
+        - database
+      restart: always
+      healthcheck:
+        disable: false
+
+    immich-machine-learning:
+      container_name: immich_machine_learning
+      image: ghcr.io/immich-app/immich-machine-learning:v1.132.1-cuda
+      runtime: nvidia
+      volumes:
+        - "{{ deploy_immich_cache_dir }}:/cache"
+      environment:
+        DB_PASSWORD: "{{ lookup('bws_cache', 'immich_postgres_pwd').value }}"
+        DB_USERNAME: postgres
+        DB_DATABASE_NAME: immich
+      restart: always
+      healthcheck:
+        disable: false
+
+    redis:
+      container_name: immich_redis
+      image: docker.io/valkey/valkey:8-bookworm@sha256:42cba146593a5ea9a622002c1b7cba5da7be248650cbb64ecb9c6c33d29794b1
+      healthcheck:
+        test: redis-cli ping || exit 1
+      restart: always
+
+    database:
+      container_name: immich_postgres
+      image: docker.io/tensorchord/pgvecto-rs:pg14-v0.2.0@sha256:739cdd626151ff1f796dc95a6591b55a714f341c737e27f045019ceabf8e8c52
+      environment:
+        POSTGRES_PASSWORD: "{{ lookup('bws_cache', 'immich_postgres_pwd').value }}"
+        POSTGRES_USER: postgres
+        POSTGRES_DB: immich
+        POSTGRES_INITDB_ARGS: '--data-checksums'
+      volumes:
+        # Do not edit the next line. If you want to change the database storage location on your system, edit the value of DB_DATA_LOCATION in the .env file
+        - "{{ deploy_immich_database_dir }}:/var/lib/postgresql/data"
+      healthcheck:
+        test: >-
+          pg_isready --dbname="$${POSTGRES_DB}" --username="$${POSTGRES_USER}" || exit 1; Chksum="$$(psql --dbname="$${POSTGRES_DB}" --username="$${POSTGRES_USER}" --tuples-only --no-align --command='SELECT COALESCE(SUM(checksum_failures), 0) FROM pg_stat_database')"; echo "checksum failure count is $$Chksum"; [ "$$Chksum" = '0' ] || exit 1
+        interval: 5m
+        start_interval: 30s
+        start_period: 5m
+      command: >-
+        postgres -c shared_preload_libraries=vectors.so -c 'search_path="$$user", public, vectors' -c logging_collector=on -c max_wal_size=2GB -c shared_buffers=512MB -c wal_compression=on
+      restart: always
