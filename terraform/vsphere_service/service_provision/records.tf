@@ -156,6 +156,18 @@ locals {
       data     = "proxy-internal-01.ripplefcl.com."
       type     = "CNAME"
     },
+    {
+      hostname = "omni-poly"
+      zone     = gravity_dns_zone.ripplefcl_com.id
+      data     = "proxy-internal-01.ripplefcl.com."
+      type     = "CNAME"
+    },
+    {
+      hostname = "libretranslate"
+      zone     = gravity_dns_zone.ripplefcl_com.id
+      data     = "proxy-internal-01.ripplefcl.com."
+      type     = "CNAME"
+    },
   ])
 }
 

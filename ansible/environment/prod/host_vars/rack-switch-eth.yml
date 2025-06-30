@@ -29,6 +29,9 @@ configure_switch_interfaces:
   unifi_ap:
     interface: ether12
     comment: unifi_ap
+  printer:
+    interface: ether18
+    comment: 3d printer
 
 configure_switch_bridges:
   main_bridge:
@@ -61,6 +64,8 @@ configure_switch_bridges:
           - guest_lan
       - interface: wan1
         untagged: wan_vlan
+      - interface: printer
+        untagged: lan
 
 
 configure_switch_vlan_interfaces:

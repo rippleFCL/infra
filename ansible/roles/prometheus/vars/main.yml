@@ -11,6 +11,7 @@ prometheus_cmd_merged: "{{ prometheus_cmd_base + prometheus_extra_args }}"
 prometheus_service_def:
   services:
     prometheus:
+      restart: unless-stopped
       image: prom/prometheus:v2.53.4
       command: "{{ prometheus_cmd_merged }}"
       extra_hosts:

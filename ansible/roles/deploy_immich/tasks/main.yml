@@ -1,0 +1,20 @@
+- name: Check Upload dir provided
+  ansible.builtin.assert:
+    that: deploy_immich_image_dir is defined
+
+- name: Make data directories
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    mode: '0755'
+  loop:
+    - "{{ deploy_immich_data_dir }}"
+    - "{{ deploy_immich_cache_dir }}"
+    - "{{ deploy_immich_database_dir }}"
+    - "{{ deploy_immich_upload_dir }}"
+
+
+- name: Create docker stack
+  community.docker.docker_compose_v2:
+    project_name: immich
+    definition: "{{ deploy_immich_stack }}"

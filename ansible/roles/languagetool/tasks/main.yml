@@ -15,7 +15,7 @@
 - name: Deploy LanguageTool container
   community.docker.docker_container:
     name: languagetool
-    image: erikvl87/languagetool:6.5
+    image: erikvl87/languagetool:6.6-dockerupdate-1
     restart_policy: always
     ports:
       - 8020:8010

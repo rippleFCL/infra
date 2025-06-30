@@ -1,0 +1,6 @@
+---
+- name: Deploy Mainsail Config
+  hosts: mainsail_hosts
+  become: true
+  roles:
+    - role: configure_mainsail

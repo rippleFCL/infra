@@ -1,0 +1,9 @@
+---
+- name: Pose clone setup
+  ansible.builtin.import_playbook: ../common/post_debian_clone.yml
+
+- name: Deploy Mainsail
+  ansible.builtin.import_playbook: ../common/deploy_mainsail.yml
+
+- name: Configure Mainsail
+  ansible.builtin.import_playbook: ../services/configure_mainsail.yml

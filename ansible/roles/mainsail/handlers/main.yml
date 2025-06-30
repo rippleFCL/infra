@@ -1,0 +1,22 @@
+---
+- name: Restart klipper
+  ansible.builtin.systemd:
+    name: klipper
+    state: restarted
+    daemon_reload: true
+
+- name: Restart moonraker
+  ansible.builtin.systemd:
+    name: moonraker
+    state: restarted
+    daemon_reload: true
+
+- name: Restart nginx
+  ansible.builtin.systemd:
+    name: nginx
+    state: restarted
+    daemon_reload: true
+
+- name: Reload systemd
+  ansible.builtin.systemd:
+    daemon_reload: true

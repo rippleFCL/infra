@@ -1,0 +1,20 @@
+#Systemd moonraker Service
+
+[Unit]
+Description=API Server for Klipper SV1
+Requires=network-online.target
+After=network-online.target
+
+[Install]
+WantedBy=multi-user.target
+
+[Service]
+Type=simple
+User={{ mainsail_user }}
+SupplementaryGroups=moonraker-admin
+RemainAfterExit=yes
+WorkingDirectory={{ mainsail_moonraker_dir }}
+EnvironmentFile={{ mainsail_printer_systemd_dir }}/moonraker.env
+ExecStart={{ mainsail_moonraker_venv }}/bin/python $MOONRAKER_ARGS
+Restart=always
+RestartSec=10

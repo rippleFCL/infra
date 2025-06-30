@@ -1,0 +1,51 @@
+---
+- name: Create NGINX upstreams configuration
+  ansible.builtin.template:
+    src: upstreams.conf.j2
+    dest: /etc/nginx/conf.d/upstreams.conf
+    owner: root
+    group: root
+    mode: '0644'
+  notify:
+    - Restart nginx
+
+- name: Create NGINX common variables configuration
+  ansible.builtin.template:
+    src: common_vars.conf.j2
+    dest: /etc/nginx/conf.d/common_vars.conf
+    owner: root
+    group: root
+    mode: '0644'
+  notify:
+    - Restart nginx
+
+- name: Create NGINX Mainsail site configuration
+  ansible.builtin.template:
+    src: mainsail.nginx.j2
+    dest: /etc/nginx/sites-available/mainsail
+    owner: root
+    group: root
+    mode: '0644'
+  notify:
+    - Restart nginx
+
+- name: Remove default NGINX site
+  ansible.builtin.file:
+    path: /etc/nginx/sites-enabled/default
+    state: absent
+  notify:
+    - Restart nginx
+
+- name: Enable Mainsail NGINX site
+  ansible.builtin.file:
+    src: /etc/nginx/sites-available/mainsail
+    dest: /etc/nginx/sites-enabled/mainsail
+    state: link
+  notify:
+    - Restart nginx
+
+- name: Enable and start NGINX service
+  ansible.builtin.systemd:
+    name: nginx
+    enabled: true
+    state: started

@@ -1,0 +1,6 @@
+nmcli_interfaces:
+  - name: ens192
+    method: manual
+    gateway: "10.0.7.1"
+    dns: "10.0.7.1"
+    ip: 10.0.7.16/24

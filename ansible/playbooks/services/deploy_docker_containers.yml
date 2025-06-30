@@ -37,6 +37,16 @@
       tags:
         - docker
         - rommapp
+    - role: deploy_immich
+      when: "'deploy_immich' in deploy_docker_roles | default([])"
+      tags:
+        - docker
+        - immich
+    - role: prometheus
+      when: "'prometheus' in deploy_docker_roles | default([])"
+      tags:
+        - docker
+        - prometheus
   tasks:
     - block:
       - name: Ensure deb deps

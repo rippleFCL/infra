@@ -1,0 +1,43 @@
+[server]
+host: 0.0.0.0
+port: {{ mainsail_moonraker_port }}
+# The maximum size allowed for a file upload (in MiB).  Default 1024 MiB
+max_upload_size: 1024
+# Path to klippy Unix Domain Socket
+klippy_uds_address: {{ mainsail_printer_comms_dir }}/klippy.sock
+
+[file_manager]
+# post processing for object cancel. Not recommended for low resource SBCs such as a Pi Zero. Default False
+enable_object_processing: False
+
+[authorization]
+cors_domains:
+{% for domain in mainsail_moonraker_cors_domains %}
+    {{ domain }}
+{% endfor %}
+trusted_clients:
+{% for client in mainsail_moonraker_trusted_clients %}
+    {{ client }}
+{% endfor %}
+
+# enables partial support of Octoprint API
+[octoprint_compat]
+
+# enables moonraker to track and store print history.
+[history]
+
+# this enables moonraker announcements for mainsail
+[announcements]
+subscriptions:
+    mainsail
+
+# this enables moonraker's update manager
+[update_manager]
+refresh_interval: 168
+enable_auto_refresh: True
+
+[update_manager mainsail]
+type: web
+channel: stable
+repo: mainsail-crew/mainsail
+path: {{ mainsail_dir }}

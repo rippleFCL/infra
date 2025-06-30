@@ -1,8 +1,4 @@
 ---
-- name: Configure users
-  ansible.builtin.include_role:
-    name: setup_users
-
 - name: Apply dhcp client fix
   ansible.builtin.include_tasks:
     file: dhcp_client_fix.yml

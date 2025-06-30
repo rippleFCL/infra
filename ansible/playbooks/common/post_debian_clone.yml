@@ -2,6 +2,12 @@
 - name: 'Bootstrap vm'
   hosts: debian
   become: true
+  roles:
+    - setup_users
+    - post_debian_clone
+    - nmcli
+  vars:
+    ansible_user: "ansible"
   tasks:
     - name: Configure extra disks
       ansible.builtin.include_role:
@@ -25,9 +31,18 @@
     - name: Setup nmcli
       ansible.builtin.include_role:
         name: nmcli
-        
+
 - name: 'Bootstrap vm'
   hosts: docker_hosts
   become: true
   roles:
     - geerlingguy.docker
+    - nmcli
+    - setup_users
+  tasks:
+    - name: Ensure deb deps
+      ansible.builtin.apt:
+        name:
+          - python3-pip
+          - python3-yaml
+        state: present

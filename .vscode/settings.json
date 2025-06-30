@@ -1,6 +1,4 @@
 {
-    "ansible.python.interpreterPath": "/home/ripple/.cache/pypoetry/virtualenvs/infrastructure-Hca9NF0D-py3.13/bin/python",
-    "ansible.python.activationScript": ".venv/bin/activate",
     "yaml.schemas": {
         "https://raw.githubusercontent.com/ansible/ansible-lint/main/src/ansiblelint/schemas/ansible.json#/$defs/playbook": [
             "file:///home/ripple/programming/infrastructure/ansible/playbooks/vms/deply-ssd-nas.yml",
@@ -18,4 +16,5 @@
         "*.pkrtpl.hcl": "",
         "*.yml.tftpl": "yaml"
     },
+    "ansible.python.interpreterPath": "/home/ripple/.cache/pypoetry/virtualenvs/infrastructure-LyqsUr_x-py3.13/bin/python",
 }

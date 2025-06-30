@@ -213,3 +213,31 @@ module "docker-proxy-external" {
     ]
   }
 }
+
+module "mainsail" {
+  vm_os = "debian"
+
+  vsphere_datacenter_id = data.vsphere_datacenter.dc.id
+
+  source          = "../../modules/vsphere_vm"
+  vsphere_cluster = "storage-cluster"
+  vm_host_id      = data.vsphere_host.esxi_storage1.id
+  is_ha           = false
+  vm_name         = "3d-printer-prod"
+  vm_hostname     = "3d-printer"
+  vm_template     = "deb-x12-template-prod"
+  vm_domain       = "int.ripplefcl.com"
+  vm_folder       = vsphere_folder.vm_folder.path
+  vm_tags         = [vsphere_tag.mainsail-host.id, vsphere_tag.debian.id]
+
+  # vsphere_cluster = var.vsphere_cluster
+  vm_datastore = "big-ssd-datastore"
+  network_spec = [{
+    network_id = data.vsphere_network.storage_cu_vm_vlan.id
+  }]
+  spec = {
+    cpu       = 2
+    memory    = 5120
+    disk_size = 32
+  }
+}
